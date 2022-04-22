@@ -1,15 +1,22 @@
 from copy import deepcopy
-from .libs import download_data, CONFIG_DEFAULTS
+
+from .libs import download_data, calculate_momentum, ConfigProperties
 
 class IntelliStop:
-    config = deepcopy(CONFIG_DEFAULTS)
+    config: ConfigProperties = {}
+    data = {}
+    fund_name = ""
 
     def __init__(self, config: dict = {}):
-        if "period" in config:
-            self.config["period"] = config["period"]
-        if "interval" in config:
-            self.config["interval"] = config["interval"]
+        self.config = ConfigProperties(config)
 
 
     def fetch_data(self, fund: str):
-        return download_data(fund, self.config)
+        self.fund_name = fund
+        self.data = download_data(fund, self.config)
+        return self.data
+
+
+    def calculate_stops(self):
+        fund_momentum = calculate_momentum(self.data[self.fund_name], self.config)
+        print("stops")
