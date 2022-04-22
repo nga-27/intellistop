@@ -1,5 +1,5 @@
 from copy import deepcopy
-from .data import download_data, CONFIG_DEFAULTS
+from .libs import download_data, CONFIG_DEFAULTS
 
 class IntelliStop:
     config = deepcopy(CONFIG_DEFAULTS)
