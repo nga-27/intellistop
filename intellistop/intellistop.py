@@ -1,6 +1,7 @@
-from copy import deepcopy
-
-from .libs import download_data, calculate_momentum, ConfigProperties
+from .libs import (
+    download_data, calculate_difference_momentum, calculate_momentum,
+    ConfigProperties
+)
 
 class IntelliStop:
     config: ConfigProperties = {}
@@ -20,5 +21,7 @@ class IntelliStop:
 
 
     def calculate_stops(self):
-        fund_momentum = calculate_momentum(self.data[self.fund_name], self.config)
-        print("stops")
+        fund_momentum = calculate_difference_momentum(self.data[self.fund_name], self.config)
+        fund_momentum2 = calculate_momentum(self.data[self.fund_name], self.config)
+        print(f"stops {fund_momentum[14]}")
+        print(f"momentum2 {fund_momentum2[14]}")
