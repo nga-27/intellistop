@@ -10,6 +10,8 @@ class IntelliStop:
     def __init__(self, config: dict = {}):
         self.config = ConfigProperties(config)
 
+    def update_config(self, config: dict = {}):
+        self.config = ConfigProperties(config)
 
     def fetch_data(self, fund: str):
         self.fund_name = fund
