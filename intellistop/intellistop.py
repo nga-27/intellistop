@@ -1,5 +1,5 @@
 from .libs import (
-    download_data, calculate_difference_momentum, calculate_momentum,
+    download_data, calculate_momentum, beta,
     ConfigProperties
 )
 
@@ -7,6 +7,7 @@ class IntelliStop:
     config: ConfigProperties = {}
     data = {}
     fund_name = ""
+    benchmark = "^GSPC"
 
     def __init__(self, config: dict = {}):
         self.config = ConfigProperties(config)
@@ -21,7 +22,6 @@ class IntelliStop:
 
 
     def calculate_stops(self):
-        fund_momentum = calculate_difference_momentum(self.data[self.fund_name], self.config)
-        fund_momentum2 = calculate_momentum(self.data[self.fund_name], self.config)
+        fund_momentum = calculate_momentum(self.data[self.fund_name], self.config)
+        fund_beta = beta(self.data[self.fund_name], self.data[self.benchmark])
         print(f"stops {fund_momentum[14]}")
-        print(f"momentum2 {fund_momentum2[14]}")
