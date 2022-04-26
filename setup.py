@@ -36,6 +36,7 @@ REQUIRES = [
 ]
 
 REQUIRES_DEV = [
+    "matplotlib==3.5.1"
 ]
 
 setup(

@@ -1,5 +1,5 @@
 from .libs import (
-    download_data, calculate_momentum, beta,
+    download_data, calculate_momentum, get_beta, get_alpha,
     ConfigProperties
 )
 
@@ -23,5 +23,8 @@ class IntelliStop:
 
     def calculate_stops(self):
         fund_momentum = calculate_momentum(self.data[self.fund_name], self.config)
-        fund_beta = beta(self.data[self.fund_name], self.data[self.benchmark])
+        fund_beta = get_beta(self.data[self.fund_name], self.data[self.benchmark])
+        fund_alpha = get_alpha(
+            self.data[self.fund_name], self.data[self.benchmark], fund_beta, self.config
+        )
         print(f"stops {fund_momentum[14]}")
