@@ -1,16 +1,13 @@
-import datetime
-
 import yfinance as yf
 import pandas as pd
 
-CONFIG_DEFAULTS = {
-    "period": "5y",
-    "interval": "1d"
-}
+from .types import ConfigProperties
 
-def download_data(fund: str, config: dict=CONFIG_DEFAULTS) -> dict:
-    period = config.get('period', CONFIG_DEFAULTS["period"])
-    interval = config.get('interval', CONFIG_DEFAULTS["interval"])
+from .constants import YF_DATA_CONFIG_DEFAULTS
+
+def download_data(fund: str, config: ConfigProperties) -> dict:
+    period = config.yf_properties.period
+    interval = config.yf_properties.interval
     fund += " ^GSPC"
     data = yf.download(tickers=fund, period=period, interval=interval, group_by='ticker')
     formatted_data = data_format(data)
