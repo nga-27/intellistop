@@ -1,5 +1,6 @@
+from requests import get
 from .libs import (
-    download_data, calculate_momentum, get_beta, get_alpha,
+    download_data, calculate_momentum, get_beta, get_alpha, get_k_ratio,
     ConfigProperties
 )
 
@@ -27,4 +28,5 @@ class IntelliStop:
         fund_alpha = get_alpha(
             self.data[self.fund_name], self.data[self.benchmark], fund_beta, self.config
         )
+        fund_k_ratio = get_k_ratio(self.data[self.fund_name], self.config)
         print(f"stops {fund_momentum[14]}")
