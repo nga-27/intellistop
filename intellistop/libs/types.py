@@ -43,12 +43,16 @@ class VarianceComponents:
     negative_std: float = 0.0
 
 
+class VQProperties:
+    std_level: int = 2
+
 ################################################################
 
 class ConfigProperties:
     yf_properties = YFProperties()
     momentum_properties = MomentumProperties()
     k_ratio_properties = KRatioProperties()
+    vq_properties = VQProperties()
 
     def __init__(self, config: dict = {}):
         self.yf_properties.interval = config.get("interval", self.yf_properties.interval)
@@ -58,3 +62,4 @@ class ConfigProperties:
         self.momentum_properties.calculator = config.get("momentum_calculator", self.momentum_properties.calculator)
         self.k_ratio_properties.is_log = config.get("k_ratio_is_log", self.k_ratio_properties.is_log)
         self.k_ratio_properties.algorithm = config.get("k_ratio_algorithm", self.k_ratio_properties.algorithm)
+        self.vq_properties.std_level = config.get("vq_properties_level", self.vq_properties.std_level)

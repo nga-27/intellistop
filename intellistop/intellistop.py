@@ -1,7 +1,6 @@
-from requests import get
 from .libs import (
     download_data, calculate_momentum, get_beta, get_alpha, get_k_ratio,
-    ConfigProperties, calculate_variances, VarianceComponents
+    ConfigProperties, calculate_variances, run_vq_calculation, find_latest_max
 )
 
 class IntelliStop:
@@ -30,4 +29,7 @@ class IntelliStop:
         )
         fund_k_ratio = get_k_ratio(self.data[self.fund_name], self.config)
         variances = calculate_variances(fund_momentum, self.config)
-        print(f"stops {fund_momentum[14]}")
+        _vq = run_vq_calculation(fund_beta, fund_alpha, variances, fund_k_ratio, self.config)
+        _max = find_latest_max(self.data[self.fund_name]['Close'])
+        stop_loss = _max * (100.0 - _vq) / 100.0
+        print(f"current: {self.data[self.fund_name]['Close'][-1]}, stop: {_vq} --> ${stop_loss}")

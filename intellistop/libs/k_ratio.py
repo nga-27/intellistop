@@ -21,5 +21,4 @@ def get_k_ratio(fund_data: dict, config: ConfigProperties) -> float:
     if config.k_ratio_properties.algorithm == KRatioAlgorithms.YR_1996:
         k_ratio = (slope / stderr) * (1.0 / math.sqrt(float(len(data_set))))
 
-    print(f"k_ratio: {k_ratio}")
     return k_ratio

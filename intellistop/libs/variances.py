@@ -14,5 +14,4 @@ def calculate_variances(data_set: list, config: ConfigProperties) -> VarianceCom
 
     exported.negative_var = np.var(negative_data_set)
     exported.negative_std = np.std(negative_data_set)
-    print(exported.total_var, exported.total_std, exported.negative_std, exported.negative_var)
     return exported
