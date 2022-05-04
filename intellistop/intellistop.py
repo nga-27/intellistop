@@ -1,7 +1,7 @@
 from requests import get
 from .libs import (
     download_data, calculate_momentum, get_beta, get_alpha, get_k_ratio,
-    ConfigProperties
+    ConfigProperties, calculate_variances, VarianceComponents
 )
 
 class IntelliStop:
@@ -29,4 +29,5 @@ class IntelliStop:
             self.data[self.fund_name], self.data[self.benchmark], fund_beta, self.config
         )
         fund_k_ratio = get_k_ratio(self.data[self.fund_name], self.config)
+        variances = calculate_variances(fund_momentum, self.config)
         print(f"stops {fund_momentum[14]}")

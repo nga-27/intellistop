@@ -3,13 +3,11 @@ from enum import Enum
 from .constants import YF_DATA_CONFIG_DEFAULTS, MOMENTUM_CONFIG_DEFAULTS
 
 class YFProperties:
-    period: str = ""
-    interval: str = ""
+    period: str = YF_DATA_CONFIG_DEFAULTS["period"]
+    interval: str = YF_DATA_CONFIG_DEFAULTS["interval"]
     num_samples_per_calendar_year: int = 0
 
-    def __init__(self, property_dict: dict={}):
-        self.period = property_dict.get("period", YF_DATA_CONFIG_DEFAULTS["period"])
-        self.interval = property_dict.get("interval", YF_DATA_CONFIG_DEFAULTS["interval"])
+    def __init__(self):
         if "d" in self.interval:
             self.num_samples_per_calendar_year = 252
         if "w" in self.interval:
@@ -17,22 +15,16 @@ class YFProperties:
         if "m" in self.interval:
             self.num_samples_per_calendar_year = 12
 
-    def serialize(self):
-        return vars(self)
 
 class MomentumCalculation(Enum):
     STANDARD = 0
     DIFFERENCE = 1
 
 class MomentumProperties:
-    period: int = 10
-    metric: str = ""
+    period: int = MOMENTUM_CONFIG_DEFAULTS["period"]
+    metric: str = MOMENTUM_CONFIG_DEFAULTS["metric"]
     calculator: MomentumCalculation = MomentumCalculation.STANDARD
 
-    def __init__(self, property_dict: dict={}):
-        self.period = property_dict.get("period", MOMENTUM_CONFIG_DEFAULTS["period"])
-        self.metric = property_dict.get("metric", MOMENTUM_CONFIG_DEFAULTS["metric"])
-        self.calculator = property_dict.get("calculator", self.calculator)
 
 class KRatioAlgorithms(Enum):
     YR_1996 = 0,
@@ -43,6 +35,15 @@ class KRatioProperties:
     is_log: bool = False
     algorithm: KRatioAlgorithms = KRatioAlgorithms.YR_2013
 
+
+class VarianceComponents:
+    total_var: float = 0.0
+    total_std: float = 0.0
+    negative_var: float = 0.0
+    negative_std: float = 0.0
+
+
+################################################################
 
 class ConfigProperties:
     yf_properties = YFProperties()
