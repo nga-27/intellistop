@@ -12,5 +12,4 @@ def get_beta(fund: dict, benchmark: dict, properties: dict={}) -> float:
     fund_performance = get_daily_gains(fund)
     bench_performance = get_daily_gains(benchmark)
     slope, _, r_value, p_value, _ = linregress(fund_performance, bench_performance)
-    print(f"beta: {slope} at {r_value*r_value}")
     return slope
