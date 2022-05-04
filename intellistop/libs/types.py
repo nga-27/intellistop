@@ -27,9 +27,9 @@ class MomentumProperties:
 
 
 class KRatioAlgorithms(Enum):
-    YR_1996 = 0,
-    YR_2003 = 1,
-    YR_2013 = 2
+    YR_1996 = 1996,
+    YR_2003 = 2003,
+    YR_2013 = 2013
 
 class KRatioProperties:
     is_log: bool = False
