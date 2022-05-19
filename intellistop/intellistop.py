@@ -20,6 +20,11 @@ class IntelliStop:
         self.data = download_data(fund, self.config)
         return self.data
 
+    def return_data(self, fund=""):
+        if len(fund) > 0:
+            return self.data[fund]
+        return self.data
+
 
     def calculate_stops(self):
         fund_momentum = calculate_momentum(self.data[self.fund_name], self.config)
@@ -33,3 +38,4 @@ class IntelliStop:
         _max = find_latest_max(self.data[self.fund_name]['Close'])
         stop_loss = _max * (100.0 - _vq) / 100.0
         print(f"current: {self.data[self.fund_name]['Close'][-1]}, stop: {_vq} --> ${stop_loss}")
+        return stop_loss
