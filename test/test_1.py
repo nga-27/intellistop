@@ -1,5 +1,8 @@
+from operator import le
 from pathlib import Path
-from intellistop import IntelliStop
+
+from pandas import period_range
+from intellistop import IntelliStop, MomentumCalculation
 
 from test.utils import plot
 
@@ -51,3 +54,33 @@ def test_4():
     stop_loss = stops.calculate_stops()
     config = set_plot_config("test_4.png", "Test 4: VTI")
     plot.plot_result(stops.return_data("VTI")['Close'], stop_loss, config=config)
+
+def test_5():
+    print("\r\nStarting test 5...")
+    config = {
+        "momentum_period": 20
+    }
+
+def test_iterative():
+    print("\r\nStarting iterative test...")
+    momentum_list = [10, 20, 40]
+    period_list = ["1y", "2y"]
+    momentum_calc = [MomentumCalculation.STANDARD, MomentumCalculation.DIFFERENCE]
+    plot_config = set_plot_config("test_iterative.png", "Test Iterative: VTI")
+    losses = []
+    count = 1
+    legend = []
+    for calc in momentum_calc:
+        for mom in momentum_list:
+            for per in period_list:
+                config = {
+                    "momentum_period": mom,
+                    "period": per,
+                    "momentum_calculator": calc
+                }
+                stops = IntelliStop(config)
+                stops.fetch_data("VTI")
+                losses.append(stops.calculate_stops())
+                count += 1
+                legend.append(f"{calc}-{mom}, {per}")
+    plot.plot_result(stops.return_data("VTI")['Close'], losses, config=plot_config, legend=legend)
