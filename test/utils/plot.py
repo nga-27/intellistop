@@ -1,6 +1,8 @@
 from typing import Union
 import matplotlib.pyplot as plt
 
+# https://matplotlib.org/stable/gallery/color/named_colors.html
+
 class PlotConfig:
     title = ""
     save_plot = False
@@ -33,6 +35,32 @@ def plot_result(dataset: list, stop_loss: Union[float,list], config: dict, legen
     legend_extended = ['Close Price']
     legend_extended.extend(legend)
     ax.legend(legend_extended)
+
+    if config.save_plot:
+        plt.savefig(config.save_path)
+    if config.has_output:
+        plt.show()
+
+
+def plot_result_bar(dataset: list, x_values: Union[list,None] = None,
+                    horizontal_lines: Union[float,None] = None,
+                    config: dict = {}, legend: list = ['Stop Loss']):
+    config = PlotConfig(config)
+    if x_values is None:
+        x_values = range(len(dataset))
+    if horizontal_lines is None:
+        horizontal_lines = []
+    else:
+        horizontal_lines = [horizontal_lines] * len(dataset)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_title(config.title)
+    ax.legend(legend)
+
+    if len(horizontal_lines) > 0:
+        ax.plot(x_values, horizontal_lines)
+    plt.bar(x_values, dataset)
 
     if config.save_plot:
         plt.savefig(config.save_path)

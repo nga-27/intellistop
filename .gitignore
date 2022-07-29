@@ -130,3 +130,6 @@ dmypy.json
 
 # app-specific
 output/*
+
+# OS Specific
+.DS_Store
