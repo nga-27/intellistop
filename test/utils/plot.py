@@ -4,20 +4,24 @@ import matplotlib.pyplot as plt
 # https://matplotlib.org/stable/gallery/color/named_colors.html
 
 class PlotConfig:
-    title = ""
-    save_plot = False
-    save_path = "output.png"
-    has_output = True
+    title: str
+    save_plot: bool
+    save_path: str
+    has_output: bool
+    dual_axes: bool
+    force_plot_second_y: bool
 
     def __init__(self, config={}):
         self.title = config.get('title', "")
         self.save_plot = config.get('save_plot', False)
         self.save_path = config.get('save_path', "output.png")
         self.has_output = config.get('has_output', True)
+        self.dual_axes = config.get('dual_axes', False)
+        self.force_plot_second_y = config.get('force_plot_second_y', False)
 
 
 def plot_result(dataset: list, stop_loss: Union[float,list], config: dict, legend: list = ['Stop Loss']):
-    config = PlotConfig(config)
+    plot_config = PlotConfig(config)
     x_range = list(range(0, len(dataset)))
     
     fig = plt.figure()
@@ -27,18 +31,31 @@ def plot_result(dataset: list, stop_loss: Union[float,list], config: dict, legen
     if isinstance(stop_loss, float):
         stop_loss = [stop_loss]
     
-    for loss in stop_loss:
-        stop_range = [loss] * len(dataset)
-        ax.plot(x_range, stop_range)
+    if not plot_config.dual_axes:
+        if plot_config.force_plot_second_y:
+            ax.plot(x_range, stop_loss)
+        else:
+            for loss in stop_loss:
+                stop_range = [loss] * len(dataset)
+                ax.plot(x_range, stop_range)
 
-    ax.set_title(config.title)
+    ax.set_title(plot_config.title)
     legend_extended = ['Close Price']
     legend_extended.extend(legend)
     ax.legend(legend_extended)
 
-    if config.save_plot:
-        plt.savefig(config.save_path)
-    if config.has_output:
+    if plot_config.dual_axes:
+        ax2 = ax.twinx()
+        if plot_config.force_plot_second_y:
+            ax2.plot(x_range, stop_loss)
+        else: 
+            for loss in stop_loss:
+                stop_range = [loss] * len(dataset)
+                ax2.plot(x_range, stop_range)
+
+    if plot_config.save_plot:
+        plt.savefig(plot_config.save_path)
+    if plot_config.has_output:
         plt.show()
 
 

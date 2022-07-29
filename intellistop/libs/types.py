@@ -64,11 +64,13 @@ class BetaProperties:
     function: BetaPropertyEnum
     shift: int
     window: int
+    match_length: bool
 
     def __init__(self, config: dict = {}):
         self.function = config.get('function', BetaPropertyEnum.BETA_STANDARD)
         self.shift = config.get('shift', 0)
         self.window = config.get('window', 252)
+        self.match_length = config.get('match_length', True)
 
 ################################################################
 
