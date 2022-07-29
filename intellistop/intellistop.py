@@ -1,6 +1,7 @@
 from .libs import (
     download_data, calculate_momentum, get_beta, get_alpha, get_k_ratio,
-    ConfigProperties, calculate_variances, run_vq_calculation, find_latest_max
+    ConfigProperties, calculate_variances, run_vq_calculation, find_latest_max,
+    VQStopsResultType
 )
 
 class IntelliStop:
@@ -20,8 +21,15 @@ class IntelliStop:
         self.data = download_data(fund, self.config)
         return self.data
 
+    def return_data(self, fund=""):
+        if len(fund) > 0:
+            return self.data[fund]
+        return self.data
 
-    def calculate_stops(self):
+
+    def calculate_stops(self) -> VQStopsResultType:
+        results = VQStopsResultType()
+
         fund_momentum = calculate_momentum(self.data[self.fund_name], self.config)
         fund_beta = get_beta(self.data[self.fund_name], self.data[self.benchmark])
         fund_alpha = get_alpha(
@@ -33,3 +41,7 @@ class IntelliStop:
         _max = find_latest_max(self.data[self.fund_name]['Close'])
         stop_loss = _max * (100.0 - _vq) / 100.0
         print(f"current: {self.data[self.fund_name]['Close'][-1]}, stop: {_vq} --> ${stop_loss}")
+
+        results.stop_loss = stop_loss
+        results.vq = _vq
+        return results
