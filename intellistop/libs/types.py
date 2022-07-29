@@ -21,7 +21,7 @@ class YFProperties:
 
 
 class MomentumCalculation(Enum):
-    STANDARD = 0
+    STANDARD = 0,
     DIFFERENCE = 1
 
 class MomentumProperties:
@@ -54,6 +54,21 @@ class VQProperties:
 class VQStopsResultType:
     vq: float
     stop_loss: float
+
+
+class BetaPropertyEnum(Enum):
+    BETA_STANDARD = 0,
+    BETA_ROLLING = 1
+
+class BetaProperties:
+    function: BetaPropertyEnum
+    shift: int
+    window: int
+
+    def __init__(self, config: dict = {}):
+        self.function = config.get('function', BetaPropertyEnum.BETA_STANDARD)
+        self.shift = config.get('shift', 0)
+        self.window = config.get('window', 252)
 
 ################################################################
 
