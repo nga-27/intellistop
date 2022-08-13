@@ -23,6 +23,9 @@ def set_plot_config(file_name: str, title: str, view: bool=False) -> dict:
 
 ##############################
 
+START_DATES = ["2020-12-31"]
+MOMENTUM_CALCS = [MomentumCalculation.STANDARD]
+
 def test_2():
     print("\r\nStarting test 2...")
     stops = IntelliStop()
@@ -60,7 +63,7 @@ def test_iterative(ticker: str, target_vq: float) -> list:
     print(f"\r\nStarting iterative test for '{ticker}'...")
     momentum_list = [10, 20, 40]
     period_list = ["1y", "2y"]
-    momentum_calc = [MomentumCalculation.STANDARD, MomentumCalculation.DIFFERENCE]
+    momentum_calc = MOMENTUM_CALCS
     plot_config = set_plot_config(f"{ticker}_test_iterative.png", f"Test Iterative: {ticker}")
     plot_config2 = set_plot_config(f"{ticker}_test_iterative_dist.png", f"Test Iterative: {ticker}")
     losses = []
@@ -88,12 +91,13 @@ def test_iterative(ticker: str, target_vq: float) -> list:
     return [vq - target_vq for vq in vqs]
 
 
-def test_iterative2(ticker: str, target_vq: float) -> list:
+def test_iterative2(ticker: str, target_vq: float, **kwargs) -> list:
+    more_configs = kwargs.get('config', {})
     print(f"\r\nStarting iterative test #2 for '{ticker}'...")
     momentum_list = [10, 20, 40]
-    start_dates = ["2020-12-31", "2020-04-30"]
+    start_dates = START_DATES
     end_date = "2021-12-31"
-    momentum_calc = [MomentumCalculation.STANDARD, MomentumCalculation.DIFFERENCE]
+    momentum_calc = MOMENTUM_CALCS
     plot_config = set_plot_config(f"{ticker}_test_iterative2.png", f"Test Iterative 2: {ticker}")
     plot_config2 = set_plot_config(f"{ticker}_test_iterative2_dist.png", f"Test Iterative 2: {ticker}")
     losses = []
@@ -109,6 +113,7 @@ def test_iterative2(ticker: str, target_vq: float) -> list:
                     "end_date": end_date,
                     "momentum_calculator": calc
                 }
+                config.update(more_configs)
                 stops = IntelliStop(config)
                 stops.fetch_data(ticker)
                 result = stops.calculate_stops()
@@ -124,9 +129,9 @@ def test_iterative2(ticker: str, target_vq: float) -> list:
 
 def reveal_performance(variances: List[float]) -> list:
     momentum_list = [10, 20, 40]
-    start_dates = ["2020-12-31", "2020-04-30"]
+    start_dates = START_DATES
     end_date = "2021-12-31"
-    momentum_calc = [MomentumCalculation.STANDARD, MomentumCalculation.DIFFERENCE]
+    momentum_calc = MOMENTUM_CALCS
 
     performances = []
     count = 0

@@ -40,11 +40,27 @@ class KRatioProperties:
     algorithm: KRatioAlgorithms = KRatioAlgorithms.YR_2013
 
 
+class VarianceProperties(Enum):
+    VARIANCE_MOMENTUM = 0,
+    VARIANCE_PRICE = 1,
+    VARIANCE_WINDOWED = 2,
+    VARIANCE_ROLLING = 3
+
 class VarianceComponents:
-    total_var: float = 0.0
-    total_std: float = 0.0
-    negative_var: float = 0.0
-    negative_std: float = 0.0
+    total_var: Union[float, list] = 0.0
+    total_std: Union[float, list]
+    negative_var: Union[float, list] = 0.0
+    negative_std: Union[float, list] = 0.0
+    variance_type: VarianceProperties
+    shift: int
+    window: int
+    match_length: bool
+
+    def __init__(self, config: dict = {}):
+        self.variance_type = config.get("variance_type", VarianceProperties.VARIANCE_MOMENTUM)
+        self.shift = config.get('shift', 0)
+        self.window = config.get('window', 252)
+        self.match_length = config.get('match_length', True)
 
 
 class VQProperties:
@@ -72,6 +88,10 @@ class BetaProperties:
         self.window = config.get('window', 252)
         self.match_length = config.get('match_length', True)
 
+
+class FilterProperties:
+    filter_half_width: int = 5
+
 ################################################################
 
 class ConfigProperties:
@@ -79,6 +99,8 @@ class ConfigProperties:
     momentum_properties = MomentumProperties()
     k_ratio_properties = KRatioProperties()
     vq_properties = VQProperties()
+    variance_components = VarianceComponents()
+    filter_properties = FilterProperties()
 
     def __init__(self, config: dict = {}):
         self.yf_properties.interval = config.get("interval", self.yf_properties.interval)
@@ -94,3 +116,6 @@ class ConfigProperties:
         self.k_ratio_properties.algorithm = config.get("k_ratio_algorithm", self.k_ratio_properties.algorithm)
 
         self.vq_properties.std_level = config.get("vq_properties_level", self.vq_properties.std_level)
+        self.variance_components.variance_type = config.get("variance_type", self.variance_components.variance_type)
+
+        self.filter_properties.filter_half_width = config.get("filter_half_width", self.filter_properties.filter_half_width)

@@ -4,6 +4,7 @@ from .types import ConfigProperties, VarianceComponents
 
 def run_vq_calculation(beta: float, alpha: float, variances: VarianceComponents,
                        k_ratio: float, config: ConfigProperties) -> float:
+    print(f"------ {variances.total_std} :: {variances.negative_var} ------")
     vq = (alpha / 100.0 + beta)
     vq = vq ** k_ratio
     vq *= (((variances.total_std * config.vq_properties.std_level) ** 2) - variances.negative_var)

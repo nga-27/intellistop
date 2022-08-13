@@ -1,5 +1,6 @@
 from pathlib import Path
 from intellistop import IntelliStop, MomentumCalculation
+from intellistop.libs.types import VarianceProperties
 from test.utils import plot
 
 

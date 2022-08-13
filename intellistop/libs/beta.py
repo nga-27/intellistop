@@ -12,7 +12,7 @@ def get_daily_gains(fund: dict) -> list:
     return performance
 
 
-def get_beta(fund: dict, benchmark: dict, properties: dict={}) -> Union[Tuple[float,float],Tuple[List[float],List[float]]]:
+def get_beta(fund: dict, benchmark: dict, properties: dict={}) -> Union[Tuple[float, float], Tuple[List[float], List[float]]]:
     beta_properties = BetaProperties(properties)
     fund_performance = get_daily_gains(fund)
     bench_performance = get_daily_gains(benchmark)
