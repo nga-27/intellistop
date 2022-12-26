@@ -4,7 +4,8 @@ from .libs import (
     download_data, calculate_momentum, get_beta, get_alpha, get_k_ratio,
     ConfigProperties, calculate_variances, run_vq_calculation, find_latest_max,
     VQStopsResultType, BetaPropertyEnum, get_daily_gains, VarianceProperties,
-    windowed_filter, subtraction_filter
+    windowed_filter, subtraction_filter, fourier_spectrum, calculate_time_series_variances,
+    simple_moving_average_filter
 )
 
 class IntelliStop:
@@ -85,7 +86,7 @@ class IntelliStop:
         return self.data
 
 
-    def calculated_time_series_stops(self) -> List[VQStopsResultType]:
+    def calculated_time_series_stops(self, use_derived = False) -> List[VQStopsResultType]:
         results = list()
 
         ab_config = {
@@ -95,4 +96,11 @@ class IntelliStop:
         fund_momentum = calculate_momentum(self.data[self.fund_name], self.config)
         fund_beta = get_beta(self.data[self.fund_name], self.data[self.benchmark], properties=ab_config)
         variances = calculate_variances(fund_momentum, self.config, overrides={"variance_type": VarianceProperties.VARIANCE_ROLLING, "shift": 5})
-        return fund_beta
+
+        sma = simple_moving_average_filter(self.data[self.fund_name]['Close'], filter_size=200)
+        lp_dataset = [datum - sma[i] for i, datum in enumerate(self.data[self.fund_name]['Close'])]
+        # x_fft, y_fft, top_5 = fourier_spectrum(self.data[self.fund_name])
+        x_fft, y_fft, top_5 = fourier_spectrum({'Close': lp_dataset})
+        # variances, window = calculate_time_series_variances(self.data[self.fund_name], overrides={'window': int(min(top_5)), 'mode': 'std'})
+        variances, window = calculate_time_series_variances({'Close': lp_dataset}, overrides={'window': int(min(top_5)), 'mode': 'std', 'use_derived': use_derived})
+        return x_fft, y_fft, top_5, variances, window, sma, lp_dataset

@@ -1,6 +1,5 @@
 import numpy as np
 from .lib_types import FilterProperties
-# from .plot import plot_result
 
 
 def windowed_filter(data: list, props: FilterProperties = {}) -> list:
@@ -13,7 +12,6 @@ def windowed_filter(data: list, props: FilterProperties = {}) -> list:
         windowed_data[i] = np.mean(sub_list)
     for i in range(len(data)-props.filter_half_width-1, len(data)):
         windowed_data[i] = data[i]
-    # plot_result(data, windowed_data, config={"title": "windows", "force_plot_second_y": True})
     return windowed_data
 
 
@@ -26,5 +24,14 @@ def subtraction_filter(data: list, subtractor: list) -> list:
     for i, datum in enumerate(data):
         subbed_data[i] = (datum - subtractor[i]) / stdev
 
-    # plot_result(subbed_data, [], config={"title": "windows"})
     return subbed_data
+
+
+def simple_moving_average_filter(data: list, filter_size: int = 50) -> list:
+    filtered = [0.0] * len(data)
+    for i in range(0, filter_size - 1):
+        filtered[i] = data[i]
+    for i in range(filter_size - 1, len(data)):
+        filtered[i] = np.average(data[i - (filter_size - 1):i + 1])
+    return filtered
+    

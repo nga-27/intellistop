@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 
 # https://matplotlib.org/stable/gallery/color/named_colors.html
 
+COLORS = [
+    'black', 'orange', 'blue', 'teal', 'lawngreen', 'fuchsia', 'red', 'gold', 'forestgreen', 'purple'
+]
+
 class PlotConfig:
     title: str
     save_plot: bool
@@ -59,6 +63,33 @@ def plot_result(dataset: list, stop_loss: Union[float,list], config: dict, legen
         plt.show()
 
 
+def plot_multiple_axes_lists(list_set_a: list, list_set_b: list, config: dict, legend: list = []):
+    plot_config = PlotConfig(config)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    color_counter = 0
+
+    for dataset in list_set_a:
+        x_range = list(range(0, len(dataset)))
+        ax.plot(x_range, dataset, color=COLORS[color_counter])
+        color_counter += 1
+
+    ax2 = ax.twinx()
+    for dataset in list_set_b:
+        x_range = list(range(0, len(dataset)))
+        ax2.plot(x_range, dataset, color=COLORS[color_counter])
+        color_counter += 1
+
+    ax.set_title(plot_config.title)
+    ax.legend(legend[0:len(list_set_a)])
+    ax2.legend(legend[len(list_set_a):len(legend)], loc='upper right')
+
+    if plot_config.save_plot:
+        plt.savefig(plot_config.save_path)
+    if plot_config.has_output:
+        plt.show()
+
+
 def plot_result_bar(dataset: list, x_values: Union[list,None] = None,
                     horizontal_lines: Union[float,None] = None,
                     config: dict = {}, legend: list = ['Stop Loss']):
@@ -83,3 +114,8 @@ def plot_result_bar(dataset: list, x_values: Union[list,None] = None,
         plt.savefig(config.save_path)
     if config.has_output:
         plt.show()
+
+
+def plot_generic(x_list: list, y_list: list):
+    plt.plot(x_list, y_list)
+    plt.show()

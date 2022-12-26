@@ -29,7 +29,7 @@ REQUIRES = [
     "numpy==1.20.2",
     "pandas==1.2.4",
     "requests==2.25",
-    "scipy==1.6.2",
+    "scipy==1.9.3",
     "xlrd==1.2.0",
     "XlsxWriter==1.2.6",
     "yfinance==0.1.63",

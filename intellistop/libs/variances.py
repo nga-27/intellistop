@@ -1,5 +1,6 @@
 import numpy as np
 from .lib_types import ConfigProperties, MomentumCalculation, VarianceComponents, VarianceProperties
+from .fourier import fourier_spectrum
 
 def calculate_variances(data_set: list, config: ConfigProperties, overrides: dict = {}) -> VarianceComponents:
     exported = VarianceComponents(overrides)
@@ -48,3 +49,30 @@ def calculate_variances(data_set: list, config: ConfigProperties, overrides: dic
     exported.negative_var = np.var(negative_data_set)
     exported.negative_std = np.std(negative_data_set)
     return exported
+
+
+def calculate_time_series_variances(data_set: list, overrides: dict = {}, key: str = 'Close') -> list:
+    data_set = data_set[key]
+    ts_var = [0.0] * len(data_set)
+    window = overrides.get('window', int(max(len(data_set) / 10.0, 50)))
+    use_derived = overrides.get('use_derived', False)
+    
+    if not use_derived:
+        window = 50
+    mode = overrides.get('mode', 'var')
+
+    if mode == 'var':
+        first_var = np.var(data_set[0:window])
+        for i in range(window):
+            ts_var[i] = first_var
+        for i in range(window, len(data_set)):
+            ts_var[i] = np.var(data_set[i-window+1:i])
+
+    elif mode == 'std':
+        first_var = np.std(data_set[0:window])
+        for i in range(window):
+            ts_var[i] = first_var
+        for i in range(window, len(data_set)):
+            ts_var[i] = np.std(data_set[i-window+1:i])
+
+    return ts_var, window
