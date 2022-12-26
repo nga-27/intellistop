@@ -2,7 +2,7 @@ import math
 import numpy as np
 from scipy.stats import linregress
 
-from intellistop.libs.types import ConfigProperties, KRatioAlgorithms
+from intellistop.libs.lib_types import ConfigProperties, KRatioAlgorithms
 
 def get_k_ratio(fund_data: dict, config: ConfigProperties) -> float:
     # may have to convert fund_data to logarithmic

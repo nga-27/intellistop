@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 
-from .types import ConfigProperties
+from .lib_types import ConfigProperties
 
 from .constants import YF_DATA_CONFIG_DEFAULTS
 

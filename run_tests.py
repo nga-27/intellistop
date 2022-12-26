@@ -1,4 +1,4 @@
-from intellistop.libs.types import VarianceProperties
+from intellistop.libs.lib_types import VarianceProperties
 from test import test_1, test_time_series
 from test.utils import plot
 import numpy as np

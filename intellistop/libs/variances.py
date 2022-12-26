@@ -1,5 +1,5 @@
 import numpy as np
-from .types import ConfigProperties, MomentumCalculation, VarianceComponents, VarianceProperties
+from .lib_types import ConfigProperties, MomentumCalculation, VarianceComponents, VarianceProperties
 
 def calculate_variances(data_set: list, config: ConfigProperties, overrides: dict = {}) -> VarianceComponents:
     exported = VarianceComponents(overrides)

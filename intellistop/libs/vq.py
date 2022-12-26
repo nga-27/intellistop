@@ -1,6 +1,6 @@
 from numpy import var
 import math
-from .types import ConfigProperties, VarianceComponents
+from .lib_types import ConfigProperties, VarianceComponents
 
 def run_vq_calculation(beta: float, alpha: float, variances: VarianceComponents,
                        k_ratio: float, config: ConfigProperties) -> float:

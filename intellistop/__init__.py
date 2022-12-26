@@ -1,2 +1,2 @@
 from .intellistop import IntelliStop
-from .libs.types import MomentumCalculation
+from .libs.lib_types import MomentumCalculation

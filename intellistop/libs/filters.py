@@ -1,5 +1,5 @@
 import numpy as np
-from .types import FilterProperties
+from .lib_types import FilterProperties
 # from .plot import plot_result
 
 

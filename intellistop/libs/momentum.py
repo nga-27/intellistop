@@ -1,6 +1,6 @@
 import pandas as pd
 
-from intellistop.libs.types import ConfigProperties, MomentumCalculation
+from intellistop.libs.lib_types import ConfigProperties, MomentumCalculation
 
 def calculate_difference_momentum(single_fund_data: dict, properties: ConfigProperties) -> list:
     period = properties.momentum_properties.period

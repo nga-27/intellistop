@@ -2,7 +2,7 @@ from scipy.stats import linregress
 import numpy as np
 from typing import Union, List, Tuple
 
-from .types import BetaProperties, BetaPropertyEnum
+from .lib_types import BetaProperties, BetaPropertyEnum
 
 def get_daily_gains(fund: dict) -> list:
     performance = [0.0] * len(fund['Adj Close'])

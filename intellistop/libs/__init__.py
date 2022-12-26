@@ -1,7 +1,7 @@
 from .api import download_data
 from .constants import YF_DATA_CONFIG_DEFAULTS
 from .momentum import calculate_momentum
-from .types import (
+from .lib_types import (
     ConfigProperties, VarianceComponents, VQStopsResultType, BetaPropertyEnum, VarianceProperties
 )
 from .beta import get_beta, get_daily_gains
