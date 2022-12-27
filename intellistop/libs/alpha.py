@@ -1,6 +1,6 @@
 # Essentially, it's: alpha = fund_perf - risk_free - beta * (bench_perf - risk_free)
 # from matplotlib import pyplot as plt
-from intellistop.libs.types import ConfigProperties
+from intellistop.libs.lib_types import ConfigProperties
 from .api import download_data
 
 ONE_YEAR_TRADE_DAYS = 252
