@@ -51,7 +51,7 @@ def calculate_variances(data_set: list, config: ConfigProperties, overrides: dic
     return exported
 
 
-def calculate_time_series_variances(data_set: list, overrides: dict = {}, key: str = 'Close') -> list:
+def calculate_time_series_variances(data_set: dict, overrides: dict = {}, key: str = 'Close') -> list:
     data_set = data_set[key]
     ts_var = [0.0] * len(data_set)
     window = overrides.get('window', int(max(len(data_set) / 10.0, 50)))

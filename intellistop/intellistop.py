@@ -34,26 +34,28 @@ class IntelliStop:
 
     def calculate_vq_stops_data(self) -> VQStopsResultType:
         stops = VQStopsResultType()
-        stops.current_max = max(self.data[self.fund_name]['Close'])
+        data_key = self.config.vq_properties.pricing
+        stops.current_max = max(self.data[self.fund_name][data_key])
         stops.fund_name = self.fund_name
 
-        sma = simple_moving_average_filter(self.data[self.fund_name]['Close'], filter_size=200)
-        lp_dataset = [datum - sma[i] for i, datum in enumerate(self.data[self.fund_name]['Close'])]
-        _, _, top_5 = fourier_spectrum({'Close': lp_dataset})
+        sma = simple_moving_average_filter(self.data[self.fund_name][data_key], filter_size=200)
+        lp_dataset = [datum - sma[i] for i, datum in enumerate(self.data[self.fund_name][data_key])]
+        _, _, top_10 = fourier_spectrum({data_key: lp_dataset}, key=data_key)
 
         for is_derived in [False, True]:
             variances, _ = calculate_time_series_variances(
-                {'Close': lp_dataset},
+                {data_key: lp_dataset},
                 overrides={
-                    'window': int(min(top_5)),
+                    'window': int(min(top_10)),
                     'mode': 'std',
                     'use_derived': is_derived
-                }
+                },
+                key=data_key
             )
 
             truthy_vars = []
             falsy_vars = []
-            for i, datum in enumerate(self.data[self.fund_name]['Close']):
+            for i, datum in enumerate(self.data[self.fund_name][data_key]):
                 if datum > sma[i]:
                     truthy_vars.append(variances[i])
                 if datum < sma[i]:
@@ -63,8 +65,8 @@ class IntelliStop:
             falsy_mean = np.mean(falsy_vars)
 
             root_sq_mean = np.sqrt((truthy_mean ** 2) + (falsy_mean ** 2))
-            root_sq_fraction = (3.0 * root_sq_mean) / np.average(self.data[self.fund_name]['Close']) * 100.0
-            root_sq_sl = max(self.data[self.fund_name]['Close']) * (1.0 - (root_sq_fraction / 100.0))
+            root_sq_fraction = (3.0 * root_sq_mean) / np.average(self.data[self.fund_name][data_key]) * 100.0
+            root_sq_sl = max(self.data[self.fund_name][data_key]) * (1.0 - (root_sq_fraction / 100.0))
 
             if is_derived:
                 stops.derived.vq = root_sq_fraction
@@ -82,6 +84,7 @@ class IntelliStop:
         stops.vq.aggressive = np.max([stops.derived.vq, stops.alternate.vq])
 
         return stops
+
 
     # def get_variances(self, data, config: ConfigProperties) -> list:
     #     if config.variance_components.variance_type == VarianceProperties.VARIANCE_PRICE:

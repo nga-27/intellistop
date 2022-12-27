@@ -31,9 +31,13 @@ def set_plot_config(file_name: str, title: str, view: bool = False,
 #################################
 
 def test_ts_1(fund: str = "VTI"):
+    config = {}
+    if fund == "VWINX":
+        config["vq_properties_pricing"] = "Adj Close"
+
     stops = IntelliStop()
     stops.fetch_extended_time_series(fund)
-    close = stops.return_data(fund)['Close']
+    close = stops.return_data(fund)[config.get('vq_properties_pricing', 'Close')]
     vq_data = stops.calculate_vq_stops_data()
 
     plot_config = set_plot_config(f"{fund}_stop_loss.png", f"{fund} - Stop Loss")
@@ -47,8 +51,8 @@ def test_ts_1(fund: str = "VTI"):
         plots,
         plot_config,
         legend=[
-            f"${np.round(vq_data.stop_loss.average, 2)}",
-            f"${np.round(vq_data.stop_loss.aggressive, 2)}",
-            f"${np.round(vq_data.stop_loss.conservative, 2)}"
+            f"${np.round(vq_data.stop_loss.average, 2)} ({np.round(vq_data.vq.average, 3)})",
+            f"${np.round(vq_data.stop_loss.aggressive, 2)} ({np.round(vq_data.vq.aggressive, 3)})",
+            f"${np.round(vq_data.stop_loss.conservative, 2)} ({np.round(vq_data.vq.conservative, 3)})"
         ]
     )
