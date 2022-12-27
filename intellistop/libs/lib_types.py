@@ -9,6 +9,7 @@ class YFProperties:
     start_date: Union[str,None] = None
     end_date: Union[str,None] = None
     num_samples_per_calendar_year: int = 0
+    include_bench: bool = False
 
     def __init__(self):
         # We're assuming 1 of everything. Note "m" is minute
@@ -67,9 +68,39 @@ class VQProperties:
     std_level: int = 2
 
 
-class VQStopsResultType:
-    vq: float
+class VQStopLossResultType:
+    aggressive: float
+    average: float
+    conservative: float
+
+    def __init__(self):
+        self.aggressive = 0.0
+        self.average = 0.0
+        self.conservative = 0.0
+
+class VQStopLossRawResultType:
     stop_loss: float
+    vq: float
+
+    def __init__(self):
+        self.stop_loss = 0.0
+        self.vq = 0.0
+
+class VQStopsResultType:
+    derived: VQStopLossRawResultType
+    alternate: VQStopLossRawResultType
+    vq: VQStopLossResultType
+    stop_loss: VQStopLossResultType
+    current_max: float
+    fund_name: str
+
+    def __init__(self):
+        self.fund_name = ""
+        self.current_max = 0.0
+        self.alternate = VQStopLossRawResultType()
+        self.derived = VQStopLossRawResultType()
+        self.vq = VQStopLossResultType()
+        self.stop_loss = VQStopLossResultType()
 
 
 class BetaPropertyEnum(Enum):
@@ -107,6 +138,7 @@ class ConfigProperties:
         self.yf_properties.period = config.get("period", self.yf_properties.period)
         self.yf_properties.start_date = config.get("start_date")
         self.yf_properties.end_date = config.get("end_date")
+        self.yf_properties.include_bench = config.get("include_bench", self.yf_properties.include_bench)
 
         self.momentum_properties.period = config.get("momentum_period", self.momentum_properties.period)
         self.momentum_properties.metric = config.get("momentum_metric", self.momentum_properties.metric)
