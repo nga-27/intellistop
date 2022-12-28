@@ -1,6 +1,6 @@
 import numpy as np
 from .lib_types import ConfigProperties, MomentumCalculation, VarianceComponents, VarianceProperties
-from .fourier import fourier_spectrum
+
 
 def calculate_variances(data_set: list, config: ConfigProperties, overrides: dict = {}) -> VarianceComponents:
     exported = VarianceComponents(overrides)

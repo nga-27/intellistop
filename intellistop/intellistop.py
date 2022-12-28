@@ -1,7 +1,7 @@
 import numpy as np
 
 from .libs import (
-    download_data, ConfigProperties, VQStopsResultType, fourier_spectrum,
+    download_data, ConfigProperties, VQStopsResultType, get_fourier_spectrum,
     calculate_time_series_variances, simple_moving_average_filter
 )
 
@@ -40,7 +40,7 @@ class IntelliStop:
 
         sma = simple_moving_average_filter(self.data[self.fund_name][data_key], filter_size=200)
         lp_dataset = [datum - sma[i] for i, datum in enumerate(self.data[self.fund_name][data_key])]
-        _, _, top_10 = fourier_spectrum({data_key: lp_dataset}, key=data_key)
+        _, _, top_10 = get_fourier_spectrum({data_key: lp_dataset}, key=data_key)
 
         for is_derived in [False, True]:
             variances, _ = calculate_time_series_variances(
