@@ -1,8 +1,10 @@
+from typing import Union
+
 import numpy as np
 
 from .libs import (
     download_data, ConfigProperties, VQStopsResultType, get_fourier_spectrum,
-    calculate_time_series_variances, simple_moving_average_filter
+    calculate_time_series_variances, simple_moving_average_filter, get_extrema
 )
 
 class IntelliStop:
@@ -11,6 +13,7 @@ class IntelliStop:
     fund_name = ""
     benchmark = "^GSPC"
     latest_results = None
+    stops = VQStopsResultType()
 
     def __init__(self, config: dict = {}):
         self.config = ConfigProperties(config)
@@ -26,17 +29,18 @@ class IntelliStop:
         return self.data
 
 
-    def return_data(self, fund=""):
+    def return_data(self, fund="", key: Union[str, None] = None):
         if len(fund) > 0:
+            if key:
+                return self.data[fund][key]
             return self.data[fund]
         return self.data
 
 
     def calculate_vq_stops_data(self) -> VQStopsResultType:
-        stops = VQStopsResultType()
         data_key = self.config.vq_properties.pricing
-        stops.current_max = max(self.data[self.fund_name][data_key])
-        stops.fund_name = self.fund_name
+        self.stops.current_max = max(self.data[self.fund_name][data_key])
+        self.stops.fund_name = self.fund_name
 
         sma = simple_moving_average_filter(self.data[self.fund_name][data_key], filter_size=200)
         lp_dataset = [datum - sma[i] for i, datum in enumerate(self.data[self.fund_name][data_key])]
@@ -69,21 +73,28 @@ class IntelliStop:
             root_sq_sl = max(self.data[self.fund_name][data_key]) * (1.0 - (root_sq_fraction / 100.0))
 
             if is_derived:
-                stops.derived.vq = root_sq_fraction
-                stops.derived.stop_loss = root_sq_sl
+                self.stops.derived.vq = root_sq_fraction
+                self.stops.derived.stop_loss = root_sq_sl
             else:
-                stops.alternate.vq = root_sq_fraction
-                stops.alternate.stop_loss = root_sq_sl
+                self.stops.alternate.vq = root_sq_fraction
+                self.stops.alternate.stop_loss = root_sq_sl
 
-        stops.stop_loss.aggressive = np.min([stops.derived.stop_loss, stops.alternate.stop_loss])
-        stops.stop_loss.average = np.average([stops.derived.stop_loss, stops.alternate.stop_loss])
-        stops.stop_loss.conservative = np.max([stops.derived.stop_loss, stops.alternate.stop_loss])
+        self.stops.stop_loss.aggressive = np.min([self.stops.derived.stop_loss, self.stops.alternate.stop_loss])
+        self.stops.stop_loss.average = np.average([self.stops.derived.stop_loss, self.stops.alternate.stop_loss])
+        self.stops.stop_loss.conservative = np.max([self.stops.derived.stop_loss, self.stops.alternate.stop_loss])
 
-        stops.vq.conservative = np.min([stops.derived.vq, stops.alternate.vq])
-        stops.vq.average = np.average([stops.derived.vq, stops.alternate.vq])
-        stops.vq.aggressive = np.max([stops.derived.vq, stops.alternate.vq])
+        self.stops.vq.conservative = np.min([self.stops.derived.vq, self.stops.alternate.vq])
+        self.stops.vq.average = np.average([self.stops.derived.vq, self.stops.alternate.vq])
+        self.stops.vq.aggressive = np.max([self.stops.derived.vq, self.stops.alternate.vq])
 
-        return stops
+        return self.stops
+
+
+    def generate_smart_moving_average(self):
+        data_key = self.config.vq_properties.pricing
+        overcome = (self.stops.vq.average / 100.0) / 3.0
+        extrema_list = get_extrema(self.data[self.fund_name], overcome_pct=overcome, key=data_key)
+        return extrema_list
 
 
     # def get_variances(self, data, config: ConfigProperties) -> list:

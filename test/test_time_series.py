@@ -35,10 +35,13 @@ def test_ts_1(fund: str = "VTI"):
     if fund == "VWINX":
         config["vq_properties_pricing"] = "Adj Close"
 
-    stops = IntelliStop()
+    stops = IntelliStop(config)
     stops.fetch_extended_time_series(fund)
-    close = stops.return_data(fund)[config.get('vq_properties_pricing', 'Close')]
+    close = stops.return_data(fund, key=config.get('vq_properties_pricing', 'Close'))
     vq_data = stops.calculate_vq_stops_data()
+
+    extrema = stops.generate_smart_moving_average()
+    print(extrema)
 
     plot_config = set_plot_config(f"{fund}_stop_loss.png", f"{fund} - Stop Loss")
     plots = [

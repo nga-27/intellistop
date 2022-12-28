@@ -11,3 +11,4 @@ from .variances import calculate_variances, calculate_time_series_variances
 from .vq import run_vq_calculation, find_latest_max
 from .filters import windowed_filter, subtraction_filter, simple_moving_average_filter
 from .fourier import get_fourier_spectrum
+from .extrema import get_extrema
