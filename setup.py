@@ -21,22 +21,20 @@ DESCRIPTION = 'Library to determine a smart stop-loss for technical analysis of 
 URL = 'https://github.mmm.com/nga-27/intellistop'
 EMAIL = 'namell91@gmail.com'
 AUTHOR = 'Nick Amell'
-REQUIRES_PYTHON = '3.8.0'
+REQUIRES_PYTHON = '>=3.7.0'
 VERSION = '0.3.0'
 
 # What packages are required for this module to be executed?
 REQUIRES = [
-    "numpy==1.20.2",
-    "pandas==1.2.4",
-    "requests==2.25",
+    "numpy==1.24.1",#1.20.2",
+    "pandas==1.5.2",#1.2.4",
     "scipy==1.9.3",
-    "xlrd==1.2.0",
-    "XlsxWriter==1.2.6",
-    "yfinance==0.1.63",
+    "yfinance==0.2.3",#0.1.63",
 ]
 
 REQUIRES_DEV = [
-    "matplotlib==3.5.1"
+    "matplotlib==3.5.1",
+    "pylint==2.15.0"
 ]
 
 setup(
