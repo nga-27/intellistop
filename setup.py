@@ -50,7 +50,8 @@ setup(
             "*.tests",
             "*.tests.*"
             "tests.*",
-            "tests"
+            "tests",
+            "test"
         ]
     ),
     install_requires=REQUIRES,
