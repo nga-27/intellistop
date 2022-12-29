@@ -68,13 +68,12 @@ class IntelliStop:
 
         for is_derived in [False, True]:
             variances, _ = calculate_time_series_variances(
-                {data_key: lp_dataset},
+                lp_dataset,
                 overrides={
                     'window': int(min(top_10)),
                     'mode': 'std',
                     'use_derived': is_derived
-                },
-                key=data_key
+                }
             )
 
             truthy_vars = []
@@ -160,6 +159,7 @@ class IntelliStop:
     ##########################################################################################
     # ACTUAL FUNCTION
     ##########################################################################################
+
     def run_analysis_for_ticker(self, fund: str) -> VQStopsResultType:
         print(f"Starting 'Intellistop' with fund ticker '{fund}'...")
         self.fetch_extended_time_series(fund)
