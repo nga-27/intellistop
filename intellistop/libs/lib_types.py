@@ -66,6 +66,7 @@ class VarianceComponents:
 
 class VQProperties:
     std_level: int = 2
+    pricing: str = 'Close'
 
 
 class VQStopLossResultType:
@@ -148,6 +149,7 @@ class ConfigProperties:
         self.k_ratio_properties.algorithm = config.get("k_ratio_algorithm", self.k_ratio_properties.algorithm)
 
         self.vq_properties.std_level = config.get("vq_properties_level", self.vq_properties.std_level)
+        self.vq_properties.pricing = config.get("vq_properties_pricing", self.vq_properties.pricing)
         self.variance_components.variance_type = config.get("variance_type", self.variance_components.variance_type)
 
         self.filter_properties.filter_half_width = config.get("filter_half_width", self.filter_properties.filter_half_width)

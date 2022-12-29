@@ -4,7 +4,7 @@ import numpy as np
 from scipy.fft import fft, fftfreq
 
 
-def fourier_spectrum(data_set: dict, key: str = 'Close') -> Tuple[np.ndarray, np.ndarray, list]:
+def get_fourier_spectrum(data_set: dict, key: str = 'Close') -> Tuple[np.ndarray, np.ndarray, list]:
     data_set = data_set[key]
     x = range(0, len(data_set))
     y_fft = fft(data_set)
