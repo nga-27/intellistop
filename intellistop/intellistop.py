@@ -1,11 +1,11 @@
-from typing import Union
+from typing import Union, Tuple
 
 import numpy as np
 
 from .libs import (
     download_data, ConfigProperties, VQStopsResultType, get_fourier_spectrum,
     calculate_time_series_variances, simple_moving_average_filter, smart_moving_average,
-    SmartMovingAvgType, get_slope_of_data_set, get_stop_loss_from_value
+    SmartMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set
 )
 
 class IntelliStop:
@@ -116,7 +116,7 @@ class IntelliStop:
         return self.stops
 
 
-    def generate_smart_moving_average(self):
+    def generate_smart_moving_average(self) -> Tuple[list, list, list]:
         data_key = self.config.vq_properties.pricing
         price_data = self.data[self.fund_name][data_key]
         window = 200 + int((self.stops.vq.curated - 25.0) / 4.0 * 3.0)
@@ -137,76 +137,34 @@ class IntelliStop:
         return self.smart_moving_avg.data_set, self.smart_moving_avg.short_slope, self.smart_moving_avg.long_slope
 
 
-    def analyze_data_set(self):
+    def analyze_data_set(self) -> list:
         # Because the market typically goes up over time, we'll assume we start each 5y series
         # with an "uptrend" and therefore stop-loss mode
         data = self.data[self.fund_name][self.config.vq_properties.pricing]
         vq = self.stops.vq.curated
 
-        current_max = [0, data[0]]
-        current_min = [0, 100.0 * data[0]]
-        current_stop_losses = [0.0] * len(data)
-        current_stop_losses[0] = get_stop_loss_from_value(data[0], vq)
-        mode = 'active'
-        reset_stop = [False, False, False, False, False]
+        stop_loss_data_set, logs = generate_stop_loss_data_set(
+            data,
+            vq,
+            self.smart_moving_avg.data_set,
+            self.smart_moving_avg.short_slope,
+            self.smart_moving_avg.long_slope
+        )
 
-        for i, price in enumerate(data):
-            if mode == 'active':
-                if price > current_max[1]:
-                    current_max[1] = price
-                    current_max[0] = i
-                    current_stop_losses[i] = get_stop_loss_from_value(price, vq)
-                else:
-                    # We need to set anyway
-                    current_stop_losses[i] = current_stop_losses[i-1]
+        self.stops.stop_loss_data_set = stop_loss_data_set
+        self.stops.event_log = logs
 
-            if price < current_stop_losses[i] and mode == 'active':
-                # Officially a STOPPED OUT condition
-                mode = 'stopped'
-                current_max[1] = 0.0
-                print(f"stopped: ${price}, index: {i}")
+        return stop_loss_data_set
 
-            if mode == 'stopped':
-                # First, track minimum...
-                if price < current_min[1]:
-                    current_min[1] = price
-                    current_min[0] = i
-                    print(f"new min: ${price}, index: {i}")
 
-                # Next, price has to rebound 1 VQ % (once)
-                if price >= get_stop_loss_from_value(current_min[1], vq, isUpFrom=True) and not reset_stop[0]:
-                    reset_stop[0] = True
+    ##########################################################################################
+    # ACTUAL FUNCTION
+    ##########################################################################################
+    def run_analysis_for_ticker(self, fund: str) -> VQStopsResultType:
+        print(f"Starting 'Intellistop' with fund ticker '{fund}'...")
+        self.fetch_extended_time_series(fund)
+        self.calculate_vq_stops_data()
+        self.generate_smart_moving_average()
+        self.analyze_data_set()
 
-                # Next, price has to be above the SmMA (on-going condition, thus the reset)
-                if reset_stop[0] and price > self.smart_moving_avg.data_set[i]:
-                    reset_stop[1] = True
-                else:
-                    reset_stop[1] = False
-
-                # Next, short-time slope of SmMA must be > 0 (on-going)
-                if reset_stop[1] and self.smart_moving_avg.short_slope[i] > 0.0:
-                    reset_stop[2] = True
-                else:
-                    reset_stop[2] = False
-
-                # Next, long-time slope of SmMA must be > 0 (on-going)
-                if reset_stop[2] and self.smart_moving_avg.long_slope[i] > 0.0:
-                    reset_stop[3] = True
-                else:
-                    reset_stop[3] = True
-
-                # Finally, short_slope > long_slope (on-going)
-                if reset_stop[3] and self.smart_moving_avg.short_slope[i] > self.smart_moving_avg.long_slope[i]:
-                    reset_stop[4] = True
-
-                if all(reset_stop):
-                    # WE DID IT! We're back in!
-                    mode = 'active'
-                    reset_stop = [False for _ in reset_stop]
-                    current_max[1] = price
-                    current_max[0] = i
-                    current_stop_losses[i] = get_stop_loss_from_value(price, vq)
-                    print(f"back in: ${price}, index: {i}")
-
-        return current_stop_losses
-                
+        return self.stops
