@@ -4,7 +4,9 @@ import numpy as np
 
 from .libs import (
     download_data, ConfigProperties, VQStopsResultType, get_fourier_spectrum,
-    calculate_time_series_variances, simple_moving_average_filter, get_extrema
+    calculate_time_series_variances, simple_moving_average_filter, get_extrema,
+    exponential_moving_average_filter, weighted_moving_average_filter,
+    smart_moving_average
 )
 
 class IntelliStop:
@@ -92,9 +94,16 @@ class IntelliStop:
 
     def generate_smart_moving_average(self):
         data_key = self.config.vq_properties.pricing
-        overcome = (self.stops.vq.average / 100.0) / 3.0
-        extrema_list = get_extrema(self.data[self.fund_name], overcome_pct=overcome, key=data_key)
-        return extrema_list
+        price_data = self.data[self.fund_name][data_key]
+        window = 200 + int((self.stops.vq.average - 25.0) / 4.0 * 3.0)
+
+        simple_ma = simple_moving_average_filter(price_data, window)
+        smart_ma = smart_moving_average(price_data, window)
+
+        lp_data = [price - simple_ma[i] for i, price in enumerate(price_data)]
+        overcome = (self.stops.vq.average / 100.0) / 3.0 * 2.0
+        extrema_list = get_extrema({data_key: lp_data}, overcome_pct=overcome, key=data_key)
+        return extrema_list, lp_data, simple_ma, smart_ma
 
 
     # def get_variances(self, data, config: ConfigProperties) -> list:

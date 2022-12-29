@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Tuple
 import matplotlib.pyplot as plt
 
 # https://matplotlib.org/stable/gallery/color/named_colors.html
@@ -88,6 +88,7 @@ def plot_multiple_axes_lists(list_set_a: list, list_set_b: list, config: dict, l
         plt.savefig(plot_config.save_path)
     if plot_config.has_output:
         plt.show()
+    plt.close(fig)
 
 
 def plot_result_bar(dataset: list, x_values: Union[list,None] = None,
@@ -116,6 +117,31 @@ def plot_result_bar(dataset: list, x_values: Union[list,None] = None,
         plt.show()
 
 
-def plot_generic(x_list: list, y_list: list):
+def plot_generic(x_list: list, y_list: list, config: dict = {}):
+    config = PlotConfig(config)
+    fig = plt.figure()
     plt.plot(x_list, y_list)
-    plt.show()
+    if config.save_plot:
+        plt.savefig(config.save_path)
+    if config.has_output:
+        plt.show()
+
+
+def plot_with_circles(dataset: list, list_of_circles: Tuple[int, float], config: dict = {}, radius: int = 2):
+    config = PlotConfig(config)
+    x_range = list(range(0, len(dataset)))
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(x_range, dataset, color='black')
+    ax.set_title(config.title)
+
+    for coords in list_of_circles:
+        target = plt.Circle((coords[0], coords[1]), radius, ec='red')
+        plt.gca().add_patch(target)
+
+    if config.save_plot:
+        plt.savefig(config.save_path)
+    if config.has_output:
+        plt.show()
+    plt.close(fig)

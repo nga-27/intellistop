@@ -36,7 +36,7 @@ def get_extrema(fund: dict, overcome_pct: float = 0.03, key: str = "Close") -> l
 
             if data[i] < extrema_tracker[1] * (1.0 - overcome_pct):
                 # Capture extrema, reset tracker
-                extrema_tuples.append((extrema_tracker[0], extrema_tracker[1]))
+                extrema_tuples.append((extrema_tracker[0], extrema_tracker[1], trend))
                 extrema_tracker = [i, data[i]]
                 trend = TrendType.down
                 continue
@@ -47,7 +47,7 @@ def get_extrema(fund: dict, overcome_pct: float = 0.03, key: str = "Close") -> l
                 continue
 
             if data[i] > extrema_tracker[1] * (1.0 - overcome_pct):
-                extrema_tuples.append((extrema_tracker[0], extrema_tracker[1]))
+                extrema_tuples.append((extrema_tracker[0], extrema_tracker[1], trend))
                 extrema_tracker = [i, data[i]]
                 trend = TrendType.up
                 continue
