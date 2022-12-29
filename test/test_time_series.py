@@ -40,7 +40,7 @@ def test_ts_1(fund: str = "VTI"):
     close = stops.return_data(fund, key=config.get('vq_properties_pricing', 'Close'))
     vq_data = stops.calculate_vq_stops_data()
 
-    _, _, _, smma = stops.generate_smart_moving_average()
+    _, _, _, smma, slope, slope2 = stops.generate_smart_moving_average()
 
     plot_config = set_plot_config(f"{fund}_stop_loss.png", f"{fund} - Stop Loss")
     plots = [
@@ -59,5 +59,5 @@ def test_ts_1(fund: str = "VTI"):
         ]
     )
 
-    plot_config = set_plot_config(f"{fund}_smma_filter.png", f"{fund} - SmMA Filter")
-    plot.plot_multiple_axes_lists([close, smma], [], config=plot_config, legend=["Price", "SmMA"])
+    plot_config = set_plot_config(f"{fund}_smma_filter.png", f"{fund} - SmMA Filter ({np.round(vq_data.vq.average, 3)})", view=True)
+    plot.plot_multiple_axes_lists([close, smma], [slope, slope2], config=plot_config, legend=["Price", "SmMA"])

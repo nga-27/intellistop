@@ -37,6 +37,15 @@ The default configurations [to date] are below. See `intellistop/libs/types` for
 
 Other thought: if a shorter SMA fits tighter to a signal, and therefore is more volatile with a more volatile signal, does this mean that, in fact, the SmMA period value is _proportional_ to the VQ? (i.e. a more volatile security should have a higher period, and a more stable security will have a smaller period?) This may actually not be true, as we're looking for trends of support / resistance purely volatility.
 
+### Alternative Idea
+
+Using the "created" SmMA, we'll look at a few conditions. Our targeted **BUY** signal is after the following 4 conditions are achieved:
+
+1. Price rides 1 VQ (%) above bottom / minimum
+2. Price rides above the SmMA
+3. SMA-15(Slope(SmMA[k])) > 0
+4. SMA-50(Slope(SmMA[k])) > 0 and SMA-15 > SMA-50
+
 ### Prospective algorithm
 
 1. Calculate VQ

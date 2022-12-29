@@ -103,7 +103,18 @@ class IntelliStop:
         lp_data = [price - simple_ma[i] for i, price in enumerate(price_data)]
         overcome = (self.stops.vq.average / 100.0) / 3.0 * 2.0
         extrema_list = get_extrema({data_key: lp_data}, overcome_pct=overcome, key=data_key)
-        return extrema_list, lp_data, simple_ma, smart_ma
+
+        slope = [0.0] * len(smart_ma)
+        for i in range(1, len(smart_ma)):
+            slope[i] = smart_ma[i] - smart_ma[i-1]
+        temp_window = 15
+        tw2 = 50
+        slope2 = simple_moving_average_filter(slope, temp_window)
+        slope3 = simple_moving_average_filter(slope, tw2)
+        slope2[0:window + temp_window] = [0.0] * (window + temp_window)
+        slope3[0:window + tw2] = [0.0] * (window + tw2)
+
+        return extrema_list, lp_data, simple_ma, smart_ma, slope2, slope3
 
 
     # def get_variances(self, data, config: ConfigProperties) -> list:
