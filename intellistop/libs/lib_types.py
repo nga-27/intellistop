@@ -73,11 +73,13 @@ class VQStopLossResultType:
     aggressive: float
     average: float
     conservative: float
+    curated: float
 
     def __init__(self):
         self.aggressive = 0.0
         self.average = 0.0
         self.conservative = 0.0
+        self.curated = 0.0
 
 class VQStopLossRawResultType:
     stop_loss: float
@@ -94,6 +96,8 @@ class VQStopsResultType:
     stop_loss: VQStopLossResultType
     current_max: float
     fund_name: str
+    stop_loss_data_set: list
+    event_log: list
 
     def __init__(self):
         self.fund_name = ""
@@ -102,6 +106,35 @@ class VQStopsResultType:
         self.derived = VQStopLossRawResultType()
         self.vq = VQStopLossResultType()
         self.stop_loss = VQStopLossResultType()
+        self.stop_loss_data_set = []
+        self.event_log = []
+
+
+class SmartMovingAvgType:
+    data_set: list
+    short_slope: list
+    long_slope: list
+
+    def __init__(self):
+        self.data_set = []
+        self.short_slope = []
+        self.long_slope = []
+
+
+class StopLossEventType(Enum):
+    stop = 'stop'
+    minimum = 'minimum'
+    activate = 'activate'
+
+class StopLossEventLogType:
+    index: int
+    event: StopLossEventType
+    price: float
+
+    def __init__(self):
+        self.index = 0
+        self.event = StopLossEventType.stop
+        self.price = 0.0
 
 
 class BetaPropertyEnum(Enum):

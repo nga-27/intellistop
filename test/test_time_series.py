@@ -31,33 +31,9 @@ def set_plot_config(file_name: str, title: str, view: bool = False,
 #################################
 
 def test_ts_1(fund: str = "VTI"):
-    config = {}
-    if fund == "VWINX":
-        config["vq_properties_pricing"] = "Adj Close"
+    stops = IntelliStop()
+    vf_data = stops.run_analysis_for_ticker(fund)
+    close = stops.return_data(fund)
 
-    stops = IntelliStop(config)
-    stops.fetch_extended_time_series(fund)
-    close = stops.return_data(fund, key=config.get('vq_properties_pricing', 'Close'))
-    vq_data = stops.calculate_vq_stops_data()
-
-    _, _, _, smma = stops.generate_smart_moving_average()
-
-    plot_config = set_plot_config(f"{fund}_stop_loss.png", f"{fund} - Stop Loss")
-    plots = [
-        vq_data.stop_loss.average,
-        vq_data.stop_loss.aggressive,
-        vq_data.stop_loss.conservative
-    ]
-    plot.plot_result(
-        close,
-        plots,
-        plot_config,
-        legend=[
-            f"${np.round(vq_data.stop_loss.average, 2)} ({np.round(vq_data.vq.average, 3)})",
-            f"${np.round(vq_data.stop_loss.aggressive, 2)} ({np.round(vq_data.vq.aggressive, 3)})",
-            f"${np.round(vq_data.stop_loss.conservative, 2)} ({np.round(vq_data.vq.conservative, 3)})"
-        ]
-    )
-
-    plot_config = set_plot_config(f"{fund}_smma_filter.png", f"{fund} - SmMA Filter")
-    plot.plot_multiple_axes_lists([close, smma], [], config=plot_config, legend=["Price", "SmMA"])
+    plot_config = set_plot_config(f"{fund}_RT_SL.png", f"{fund} - Real-Time Stop Loss ({np.round(vf_data.vq.curated, 3)})")
+    plot.plot_multiple_axes_lists([close, vf_data.stop_loss_data_set,], [], config=plot_config)
