@@ -4,9 +4,8 @@ import numpy as np
 
 from .libs import (
     download_data, ConfigProperties, VQStopsResultType, get_fourier_spectrum,
-    calculate_time_series_variances, simple_moving_average_filter, get_extrema,
-    exponential_moving_average_filter, weighted_moving_average_filter,
-    smart_moving_average
+    calculate_time_series_variances, simple_moving_average_filter, smart_moving_average,
+    SmartMovingAvgType
 )
 
 class IntelliStop:
@@ -16,6 +15,7 @@ class IntelliStop:
     benchmark = "^GSPC"
     latest_results = None
     stops = VQStopsResultType()
+    smart_moving_avg = SmartMovingAvgType()
 
     def __init__(self, config: dict = {}):
         self.config = ConfigProperties(config)
@@ -25,17 +25,36 @@ class IntelliStop:
         self.config = ConfigProperties(config)
 
 
+    # Private functions
+    def get_correct_pricing_key(self, data_set: dict) -> str:
+        test_set = {data_set['Close'][3], data_set['Open'][3], data_set['High'][3], data_set['Low'][3]}
+        if len(test_set) == 1:
+            return 'Adj Close'
+        return 'Close'
+
+
     def fetch_data(self, fund: str):
         self.fund_name = fund
         self.data = download_data(fund, self.config)
         return self.data
 
 
+    def fetch_extended_time_series(self, fund: str) -> dict:
+        # For now, we'll just default to 5y of analysis
+        self.fund_name = fund
+        self.config.yf_properties.period = '5y'
+        self.config.yf_properties.start_date = None
+        self.config.yf_properties.end_date = None
+        self.data = download_data(fund, self.config)
+        self.config.vq_properties.pricing = self.get_correct_pricing_key(self.data[self.fund_name])
+        return self.data
+
+
     def return_data(self, fund="", key: Union[str, None] = None):
+        if not key:
+            key = self.config.vq_properties.pricing
         if len(fund) > 0:
-            if key:
-                return self.data[fund][key]
-            return self.data[fund]
+            return self.data[fund][key]
         return self.data
 
 
@@ -97,72 +116,25 @@ class IntelliStop:
         price_data = self.data[self.fund_name][data_key]
         window = 200 + int((self.stops.vq.average - 25.0) / 4.0 * 3.0)
 
-        simple_ma = simple_moving_average_filter(price_data, window)
-        smart_ma = smart_moving_average(price_data, window)
+        self.smart_moving_avg.data_set = smart_moving_average(price_data, window)
 
-        lp_data = [price - simple_ma[i] for i, price in enumerate(price_data)]
-        overcome = (self.stops.vq.average / 100.0) / 3.0 * 2.0
-        extrema_list = get_extrema({data_key: lp_data}, overcome_pct=overcome, key=data_key)
+        slope = [0.0] * len(self.smart_moving_avg.data_set)
+        for i in range(1, len(self.smart_moving_avg.data_set)):
+            slope[i] = self.smart_moving_avg.data_set[i] - self.smart_moving_avg.data_set[i-1]
 
-        slope = [0.0] * len(smart_ma)
-        for i in range(1, len(smart_ma)):
-            slope[i] = smart_ma[i] - smart_ma[i-1]
-        temp_window = 15
-        tw2 = 50
-        slope2 = simple_moving_average_filter(slope, temp_window)
-        slope3 = simple_moving_average_filter(slope, tw2)
-        slope2[0:window + temp_window] = [0.0] * (window + temp_window)
-        slope3[0:window + tw2] = [0.0] * (window + tw2)
+        short_window = 15
+        long_window = 50
+        self.smart_moving_avg.short_slope = simple_moving_average_filter(slope, short_window)
+        self.smart_moving_avg.long_slope = simple_moving_average_filter(slope, long_window)
 
-        return extrema_list, lp_data, simple_ma, smart_ma, slope2, slope3
+        # Because of how we generate the SMAs for x < filter_size, we want to just 0 them out to as
+        # avoid any oddities with the "re-entry" algorithm
+        self.smart_moving_avg.short_slope[0:window + short_window] = [0.0] * (window + short_window)
+        self.smart_moving_avg.long_slope[0:window + long_window] = [0.0] * (window + long_window)
 
-
-    # def get_variances(self, data, config: ConfigProperties) -> list:
-    #     if config.variance_components.variance_type == VarianceProperties.VARIANCE_PRICE:
-    #         fund_performance = get_daily_gains(data)
-    #         variances = calculate_variances(fund_performance, config)
-
-    #     elif config.variance_components.variance_type == VarianceProperties.VARIANCE_WINDOWED:
-    #         windowed_data = windowed_filter(data['Close'], props=self.config.filter_properties)
-    #         normalized_data = subtraction_filter(data['Close'], windowed_data)
-    #         variances = calculate_variances(normalized_data, config)
-
-    #     else:
-    #         fund_momentum = calculate_momentum(data, config)
-    #         variances = calculate_variances(fund_momentum, config)
-    #     return variances
+        return self.smart_moving_avg.data_set, self.smart_moving_avg.short_slope, self.smart_moving_avg.long_slope
 
 
-    # def calculate_stops_deprecated(self) -> VQStopsResultType:
-    #     results = VQStopsResultType()
+    def analyze_data_set(self):
+        data_key = self.config.vq_properties.pricing
 
-    #     variances = self.get_variances(self.data[self.fund_name], self.config)
-
-    #     fund_beta = get_beta(self.data[self.fund_name], self.data[self.benchmark])
-    #     fund_alpha = get_alpha(
-    #         self.data[self.fund_name], self.data[self.benchmark], fund_beta[0], self.config
-    #     )
-    #     fund_k_ratio = get_k_ratio(self.data[self.fund_name], self.config)            
-
-    #     _vq = run_vq_calculation(fund_beta[0], fund_alpha, variances, fund_k_ratio, self.config)
-    #     _max = find_latest_max(self.data[self.fund_name]['Close'])
-    #     stop_loss = _max * (100.0 - _vq) / 100.0
-
-    #     results.stop_loss = stop_loss
-    #     results.vq = _vq
-    #     self.latest_results = results
-    #     return results
-
-    
-    def get_latest_results(self):
-        return self.latest_results
-
-
-    def fetch_extended_time_series(self, fund: str) -> dict:
-        # For now, we'll just default to 5y of analysis
-        self.fund_name = fund
-        self.config.yf_properties.period = '5y'
-        self.config.yf_properties.start_date = None
-        self.config.yf_properties.end_date = None
-        self.data = download_data(fund, self.config)
-        return self.data

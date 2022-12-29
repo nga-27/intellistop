@@ -104,6 +104,17 @@ class VQStopsResultType:
         self.stop_loss = VQStopLossResultType()
 
 
+class SmartMovingAvgType:
+    data_set: list
+    short_slope: list
+    long_slope: list
+
+    def __init__(self):
+        self.data_set = []
+        self.short_slope = []
+        self.long_slope = []
+
+
 class BetaPropertyEnum(Enum):
     BETA_STANDARD = 0,
     BETA_ROLLING = 1

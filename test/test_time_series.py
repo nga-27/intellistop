@@ -31,16 +31,12 @@ def set_plot_config(file_name: str, title: str, view: bool = False,
 #################################
 
 def test_ts_1(fund: str = "VTI"):
-    config = {}
-    if fund == "VWINX":
-        config["vq_properties_pricing"] = "Adj Close"
-
-    stops = IntelliStop(config)
+    stops = IntelliStop()
     stops.fetch_extended_time_series(fund)
-    close = stops.return_data(fund, key=config.get('vq_properties_pricing', 'Close'))
+    close = stops.return_data(fund)
     vq_data = stops.calculate_vq_stops_data()
 
-    _, _, _, smma, slope, slope2 = stops.generate_smart_moving_average()
+    smart_moving_avg, slope, slope2 = stops.generate_smart_moving_average()
 
     plot_config = set_plot_config(f"{fund}_stop_loss.png", f"{fund} - Stop Loss")
     plots = [
@@ -59,5 +55,5 @@ def test_ts_1(fund: str = "VTI"):
         ]
     )
 
-    plot_config = set_plot_config(f"{fund}_smma_filter.png", f"{fund} - SmMA Filter ({np.round(vq_data.vq.average, 3)})", view=True)
-    plot.plot_multiple_axes_lists([close, smma], [slope, slope2], config=plot_config, legend=["Price", "SmMA"])
+    plot_config = set_plot_config(f"{fund}_smma_filter.png", f"{fund} - SmMA Filter ({np.round(vq_data.vq.average, 3)})")
+    plot.plot_multiple_axes_lists([close, smart_moving_avg], [slope, slope2], config=plot_config, legend=["Price", "SmMA"])
