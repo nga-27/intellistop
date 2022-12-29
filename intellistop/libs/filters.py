@@ -68,3 +68,9 @@ def smart_moving_average(data: list, filter_size: int = 50) -> list:
     filtered = [(ema[i] + wma[i] + sma[i]) / 3.0 for i in range(len(data))]
     return filtered
 
+
+def get_slope_of_data_set(data_set: list) -> list:
+    slope = [0.0] * len(data_set)
+    for i in range(1, len(data_set)):
+        slope[i] = data_set[i] - data_set[i-1]
+    return slope

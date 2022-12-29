@@ -1,4 +1,4 @@
-from numpy import var
+from typing import Tuple
 import math
 from .lib_types import ConfigProperties, VarianceComponents
 
@@ -20,3 +20,22 @@ def find_latest_max(data_set: list, last_values=100) -> float:
         if data_set[i] > max_val:
             max_val = data_set[i]
     return max_val
+
+
+def get_stop_loss_from_list(price_list: list, vq: float) -> Tuple[float, float, int]:
+    current_max_value = 0.0
+    current_max_index = 0
+    current_stop_loss = 0.0
+    for i, price in enumerate(price_list):
+        if price > current_max_value:
+            current_max_value = price
+            current_max_index = i
+            current_stop_loss = price * (1.0 - (vq / 100.0))
+
+    return current_stop_loss, current_max_value, current_max_index
+
+
+def get_stop_loss_from_value(price: float, vq: float, isUpFrom: bool = False) -> float:
+    if isUpFrom:
+        return price * (1.0 + (vq / 100.0))
+    return price * (1.0 - (vq / 100.0))
