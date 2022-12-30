@@ -17,6 +17,7 @@ class IntelliStop:
     latest_results = None
     stops = VQStopsResultType()
     smart_moving_avg = SmartMovingAvgType()
+    has_errors = False
 
     def __init__(self, config: dict = {}):
         self.config = ConfigProperties(config)
@@ -27,6 +28,8 @@ class IntelliStop:
 
 
     def get_correct_pricing_key(self, data_set: dict) -> str:
+        if self.has_errors:
+            return 'Close'
         test_set = {data_set['Close'][3], data_set['Open'][3], data_set['High'][3], data_set['Low'][3]}
         if len(test_set) == 1:
             return 'Adj Close'
@@ -46,6 +49,10 @@ class IntelliStop:
         self.config.yf_properties.start_date = None
         self.config.yf_properties.end_date = None
         self.data = download_data(fund, self.config)
+
+        if len(self.data[self.fund_name]['Close']) == 0:
+            self.has_errors = True
+
         self.config.vq_properties.pricing = self.get_correct_pricing_key(self.data[self.fund_name])
         return self.data
 
@@ -61,6 +68,9 @@ class IntelliStop:
 
 
     def calculate_vq_stops_data(self) -> VQStopsResultType:
+        if self.has_errors:
+            return self.stops
+
         data_key = self.config.vq_properties.pricing
         self.stops.current_max = max(self.data[self.fund_name][data_key])
         self.stops.fund_name = self.fund_name
@@ -119,6 +129,9 @@ class IntelliStop:
 
 
     def generate_smart_moving_average(self) -> Tuple[list, list, list]:
+        if self.has_errors:
+            return ([], [], [])
+
         data_key = self.config.vq_properties.pricing
         price_data = self.data[self.fund_name][data_key]
         window = 200 + int((self.stops.vq.curated - 25.0) / 4.0 * 3.0)
@@ -140,6 +153,9 @@ class IntelliStop:
 
 
     def analyze_data_set(self) -> list:
+        if self.has_errors:
+            return []
+
         # Because the market typically goes up over time, we'll assume we start each 5y series
         # with an "uptrend" and therefore stop-loss mode
         data = self.data[self.fund_name][self.config.vq_properties.pricing]

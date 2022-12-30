@@ -23,9 +23,8 @@ def set_plot_config(file_name: str, title: str, view: bool = False,
     new_config["title"] = title
     new_config["dual_axes"] = dual_axes
     new_config["force_plot_second_y"] = force_plot_y
-    if view:
-        new_config["save_plot"] = False
-        new_config["has_output"] = True
+    new_config["save_plot"] = True
+    new_config["has_output"] = view
     return new_config
 
 
@@ -39,8 +38,22 @@ def run_app():
     close = stops.return_data(fund)
     dates = stops.return_data(fund, key='__full__').get('Date', [])
 
+    green_zones = [vf_obj.time_index_list for vf_obj in vf_data.data_sets]
+    temp_concat = []
+    for array in green_zones:
+        temp_concat.extend(array)
+    red_zones = []
+    red_one = []
+    for i in range(len(close)):
+        if i not in temp_concat:
+            red_one.append(i)
+        else:
+            if len(red_one) > 0:
+                red_zones.append(red_one)
+                red_one = []
+
     plot_config = set_plot_config(f"{fund}_RT_SL.png", f"{fund} - Real-Time Stop Loss ({np.round(vf_data.vq.curated, 3)})", view=True)
-    plot.app_plot(close, dates, vf_data.data_sets, config=plot_config)
+    plot.app_plot(close, dates, vf_data.data_sets, green_zones, red_zones, config=plot_config)
 
 
 if __name__ == "__main__":

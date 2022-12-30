@@ -2,6 +2,9 @@ from typing import Union, Tuple, List
 import datetime
 
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.patches import Rectangle
+
 from intellistop import VQTimeSeriesType
 
 # https://matplotlib.org/stable/gallery/color/named_colors.html
@@ -150,7 +153,13 @@ def plot_with_circles(dataset: list, list_of_circles: Tuple[int, float], config:
     plt.close(fig)
 
 
-def app_plot(prices: list, dates: list, stop_loss_objects: List[VQTimeSeriesType], config: dict = {}, legend: list = []):
+def app_plot(prices: list,
+             dates: list,
+             stop_loss_objects: List[VQTimeSeriesType],
+             green_zone_x_values: List[list],
+             red_zone_x_values: List[list],
+             config: dict = {},
+             legend: list = []):
     plot_config = PlotConfig(config)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -162,6 +171,12 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VQTimeSeriesType
         sub_dates = [date_indexes[index] for index in stop.time_index_list]
         ax.plot(sub_dates, stop.caution_line, color='gold')
         ax.plot(sub_dates, stop.stop_loss_line, color='red')
+
+    for green_zone in green_zone_x_values:
+        start = mdates.date2num(date_indexes[green_zone[0]])
+        end = mdates.date2num(date_indexes[green_zone[-1]])
+        width = end - start
+        ax.add_patch(Rectangle((start, 0), width, 5, edgecolor='green', facecolor='green', fill=True))
 
     ax.set_title(plot_config.title)
     ax.legend(legend)
