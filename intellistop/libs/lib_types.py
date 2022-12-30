@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Union, List
 
 from .constants import YF_DATA_CONFIG_DEFAULTS
 
@@ -19,29 +19,6 @@ class YFProperties:
             self.num_samples_per_calendar_year = 52
         if "mo" in self.interval:
             self.num_samples_per_calendar_year = 12
-
-
-class VarianceProperties(Enum):
-    VARIANCE_MOMENTUM = 0,
-    VARIANCE_PRICE = 1,
-    VARIANCE_WINDOWED = 2,
-    VARIANCE_ROLLING = 3
-
-class VarianceComponents:
-    total_var: Union[float, list] = 0.0
-    total_std: Union[float, list]
-    negative_var: Union[float, list] = 0.0
-    negative_std: Union[float, list] = 0.0
-    variance_type: VarianceProperties
-    shift: int
-    window: int
-    match_length: bool
-
-    def __init__(self, config: dict = {}):
-        self.variance_type = config.get("variance_type", VarianceProperties.VARIANCE_MOMENTUM)
-        self.shift = config.get('shift', 0)
-        self.window = config.get('window', 252)
-        self.match_length = config.get('match_length', True)
 
 
 class VQProperties:
@@ -69,6 +46,18 @@ class VQStopLossRawResultType:
         self.stop_loss = 0.0
         self.vq = 0.0
 
+class VQTimeSeriesType:
+    max_price: float
+    caution_line: List[float]
+    stop_loss_line: List[float]
+    time_index_list: List[int]
+
+    def __init__(self):
+        self.max_price = 0.0
+        self.caution_line = []
+        self.stop_loss_line = []
+        self.time_index_list = []
+
 class VQStopsResultType:
     derived: VQStopLossRawResultType
     alternate: VQStopLossRawResultType
@@ -76,7 +65,7 @@ class VQStopsResultType:
     stop_loss: VQStopLossResultType
     current_max: float
     fund_name: str
-    stop_loss_data_set: list
+    data_sets: List[VQTimeSeriesType]
     event_log: list
 
     def __init__(self):
@@ -86,7 +75,7 @@ class VQStopsResultType:
         self.derived = VQStopLossRawResultType()
         self.vq = VQStopLossResultType()
         self.stop_loss = VQStopLossResultType()
-        self.stop_loss_data_set = []
+        self.data_sets = []
         self.event_log = []
 
 
@@ -122,7 +111,6 @@ class StopLossEventLogType:
 class ConfigProperties:
     yf_properties = YFProperties()
     vq_properties = VQProperties()
-    variance_components = VarianceComponents()
 
     def __init__(self, config: dict = {}):
         self.yf_properties.interval = config.get("interval", self.yf_properties.interval)
@@ -133,4 +121,3 @@ class ConfigProperties:
 
         self.vq_properties.std_level = config.get("vq_properties_level", self.vq_properties.std_level)
         self.vq_properties.pricing = config.get("vq_properties_pricing", self.vq_properties.pricing)
-        self.variance_components.variance_type = config.get("variance_type", self.variance_components.variance_type)

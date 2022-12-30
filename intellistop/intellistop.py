@@ -1,11 +1,12 @@
 from typing import Union, Tuple
+from copy import deepcopy
 
 import numpy as np
 
 from .libs import (
     download_data, ConfigProperties, VQStopsResultType, get_fourier_spectrum,
     calculate_time_series_variances, simple_moving_average_filter, smart_moving_average,
-    SmartMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set
+    SmartMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set, VQTimeSeriesType
 )
 
 class IntelliStop:
@@ -50,6 +51,8 @@ class IntelliStop:
 
 
     def return_data(self, fund="", key: Union[str, None] = None):
+        if key and key == '__full__':
+            return self.data[fund]
         if not key:
             key = self.config.vq_properties.pricing
         if len(fund) > 0:
@@ -142,7 +145,7 @@ class IntelliStop:
         data = self.data[self.fund_name][self.config.vq_properties.pricing]
         vq = self.stops.vq.curated
 
-        stop_loss_data_set, logs = generate_stop_loss_data_set(
+        self.stops.data_sets, self.stops.event_log = generate_stop_loss_data_set(
             data,
             vq,
             self.smart_moving_avg.data_set,
@@ -150,10 +153,7 @@ class IntelliStop:
             self.smart_moving_avg.long_slope
         )
 
-        self.stops.stop_loss_data_set = stop_loss_data_set
-        self.stops.event_log = logs
-
-        return stop_loss_data_set
+        return self.stops.data_sets
 
 
     ##########################################################################################

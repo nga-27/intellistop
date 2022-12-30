@@ -1,5 +1,8 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, List
+import datetime
+
 import matplotlib.pyplot as plt
+from intellistop import VQTimeSeriesType
 
 # https://matplotlib.org/stable/gallery/color/named_colors.html
 
@@ -144,4 +147,27 @@ def plot_with_circles(dataset: list, list_of_circles: Tuple[int, float], config:
         plt.savefig(config.save_path)
     if config.has_output:
         plt.show()
+    plt.close(fig)
+
+
+def app_plot(prices: list, dates: list, stop_loss_objects: List[VQTimeSeriesType], config: dict = {}, legend: list = []):
+    plot_config = PlotConfig(config)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+    date_indexes = [datetime.datetime.strptime(date, '%Y-%m-%d').date() for date in dates]
+    ax.plot(date_indexes, prices, color='black')
+
+    # for i, x_list in enumerate(x_lists):
+    #     ax.plot(x_list, y_lists[i], color=COLORS[color_counter])
+    #     color_counter += 1
+
+    ax.set_title(plot_config.title)
+    ax.legend(legend)
+
+    if plot_config.save_plot:
+        plt.savefig(plot_config.save_path)
+    if plot_config.has_output:
+        plt.show()
+
     plt.close(fig)

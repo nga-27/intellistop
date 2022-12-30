@@ -32,8 +32,11 @@ REQUIRES = [
     "yfinance==0.2.3",#0.1.63",
 ]
 
+REQUIRES_APP = [
+    "matplotlib==3.5.1"
+]
+
 REQUIRES_DEV = [
-    "matplotlib==3.5.1",
     "pylint==2.15.0"
 ]
 
@@ -57,6 +60,7 @@ setup(
     install_requires=REQUIRES,
     extras_require={
         'dev': REQUIRES_DEV,
+        'app': REQUIRES_APP
     },
     include_package_data=True,
     license='MIT',

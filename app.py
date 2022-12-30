@@ -39,7 +39,7 @@ def run_app():
     close = stops.return_data(fund)
 
     plot_config = set_plot_config(f"{fund}_RT_SL.png", f"{fund} - Real-Time Stop Loss ({np.round(vf_data.vq.curated, 3)})", view=True)
-    plot.plot_multiple_axes_lists([close, vf_data.stop_loss_data_set,], [], config=plot_config)
+    plot.app_plot([list(range(len(close))), list(range(len(vf_data.stop_loss_data_set)))], [close, vf_data.stop_loss_data_set], config=plot_config)
 
 
 if __name__ == "__main__":
