@@ -158,9 +158,10 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VQTimeSeriesType
     date_indexes = [datetime.datetime.strptime(date, '%Y-%m-%d').date() for date in dates]
     ax.plot(date_indexes, prices, color='black')
 
-    # for i, x_list in enumerate(x_lists):
-    #     ax.plot(x_list, y_lists[i], color=COLORS[color_counter])
-    #     color_counter += 1
+    for stop in stop_loss_objects:
+        sub_dates = [date_indexes[index] for index in stop.time_index_list]
+        ax.plot(sub_dates, stop.caution_line, color='gold')
+        ax.plot(sub_dates, stop.stop_loss_line, color='red')
 
     ax.set_title(plot_config.title)
     ax.legend(legend)
