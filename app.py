@@ -37,9 +37,10 @@ def run_app():
     stops = IntelliStop()
     vf_data = stops.run_analysis_for_ticker(fund)
     close = stops.return_data(fund)
+    dates = stops.return_data(fund, key='__full__').get('Date', [])
 
     plot_config = set_plot_config(f"{fund}_RT_SL.png", f"{fund} - Real-Time Stop Loss ({np.round(vf_data.vq.curated, 3)})", view=True)
-    plot.app_plot([list(range(len(close))), list(range(len(vf_data.stop_loss_data_set)))], [close, vf_data.stop_loss_data_set], config=plot_config)
+    plot.app_plot(close, dates, vf_data.data_sets, config=plot_config)
 
 
 if __name__ == "__main__":
