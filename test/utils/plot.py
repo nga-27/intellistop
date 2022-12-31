@@ -158,6 +158,7 @@ def app_plot(prices: list,
              stop_loss_objects: List[VQTimeSeriesType],
              green_zone_x_values: List[list],
              red_zone_x_values: List[list],
+             yellow_zone_x_values: List[list],
              y_range: float,
              minimum: float,
              config: dict = {},
@@ -188,6 +189,12 @@ def app_plot(prices: list,
         end = mdates.date2num(date_indexes[red_zone[-1]])
         width = end - start
         ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='red', facecolor='red', fill=True))
+
+    for yellow_zone in yellow_zone_x_values:
+        start = mdates.date2num(date_indexes[yellow_zone[0]])
+        end = mdates.date2num(date_indexes[yellow_zone[-1]])
+        width = end - start
+        ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='yellow', facecolor='yellow', fill=True))
 
     ax.set_title(plot_config.title)
     ax.legend(legend)

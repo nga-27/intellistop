@@ -54,6 +54,19 @@ def run_app():
     if len(red_one) > 0:
         red_zones.append(red_one)
 
+    yellow_zones = []
+    for vf_obj in vf_data.data_sets:
+        yellow_one = []
+        for i, ind in enumerate(vf_obj.time_index_list):
+            if close[ind] < vf_obj.caution_line[i]:
+                yellow_one.append(ind)
+            else:
+                if len(yellow_one) > 0:
+                    yellow_zones.append(yellow_one)
+                    yellow_one = []
+    if len(yellow_one) > 0:
+        yellow_zones.append(yellow_one)
+
     min_value = min(
         [
             min([min(vf_obj.stop_loss_line) for vf_obj in vf_data.data_sets]),
@@ -69,6 +82,7 @@ def run_app():
         vf_data.data_sets,
         green_zones,
         red_zones,
+        yellow_zones,
         range_value,
         min_value,
         config=plot_config
