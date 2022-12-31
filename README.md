@@ -2,23 +2,23 @@
 
 Library tool to determine a smart stop-loss for technical analysis of funds. This utilizes the ***[Volatility Factor (VF)](#vf)***.
 
+<img alt="spy-stop-loss" src="static/spy_stop_loss.png" width=600/>
+
 ---
 
-# Configuration Keys
+# What is Intellistop?
 
-The default configurations [to date] are below. See `intellistop/libs/types` for other configuration inputs.
-```json
-{
-    "interval": "1d",
-    "period": "5y",
-    "momentum_period": 10,
-    "momentum_metric": "Close",
-    "momentum_calculator": 0,
-    "k_ratio_is_log": false,
-    "k_ratio_algorithm": 2013,
-    "vq_properties_level": 2
-}
-```
+---
+
+# Installation
+
+To run the `IntelliStop` library as an import [in something else], simply run pip install as you normally would:
+
+`pip install .` (or `pip install '.'` for MacOS)
+
+To run the standalone program, the one that will generate a plot image with a requested input ticker, install the additional `app` installations. (This primarily includes `matplotlib`):
+
+`pip install .[app]` (or `pip install '.[app]'` for MacOS)
 
 # Entry Signal Triggers
 

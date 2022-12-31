@@ -161,8 +161,7 @@ def app_plot(prices: list,
              yellow_zone_x_values: List[list],
              y_range: float,
              minimum: float,
-             config: dict = {},
-             legend: list = []):
+             config: dict = {}):
     plot_config = PlotConfig(config)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -197,7 +196,6 @@ def app_plot(prices: list,
         ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='yellow', facecolor='yellow', fill=True))
 
     ax.set_title(plot_config.title)
-    ax.legend(legend)
 
     if plot_config.save_plot:
         plt.savefig(plot_config.save_path)

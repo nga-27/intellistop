@@ -75,7 +75,7 @@ def run_app():
     )
     range_value = max(close) - min_value
 
-    plot_config = set_plot_config(f"{fund}_RT_SL.png", f"{fund} - Real-Time Stop Loss ({np.round(vf_data.vq.curated, 3)})", view=True)
+    plot_config = set_plot_config(f"{fund}_stop_losses.png", f"{fund} - Stop Loss Analysis (VF: {np.round(vf_data.vq.curated, 3)})", view=True)
     plot.app_plot(
         close,
         dates,
