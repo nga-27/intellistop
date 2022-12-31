@@ -51,9 +51,28 @@ def run_app():
             if len(red_one) > 0:
                 red_zones.append(red_one)
                 red_one = []
+    if len(red_one) > 0:
+        red_zones.append(red_one)
+
+    min_value = min(
+        [
+            min([min(vf_obj.stop_loss_line) for vf_obj in vf_data.data_sets]),
+            min(close)
+        ]
+    )
+    range_value = max(close) - min_value
 
     plot_config = set_plot_config(f"{fund}_RT_SL.png", f"{fund} - Real-Time Stop Loss ({np.round(vf_data.vq.curated, 3)})", view=True)
-    plot.app_plot(close, dates, vf_data.data_sets, green_zones, red_zones, config=plot_config)
+    plot.app_plot(
+        close,
+        dates,
+        vf_data.data_sets,
+        green_zones,
+        red_zones,
+        range_value,
+        min_value,
+        config=plot_config
+    )
 
 
 if __name__ == "__main__":
