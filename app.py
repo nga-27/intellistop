@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 
 from intellistop import IntelliStop
-from test.utils import plot
+from plot import plot
 
 
 PLOT_DIR = Path("output").resolve().mkdir(exist_ok=True)
