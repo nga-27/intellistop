@@ -57,6 +57,22 @@ class VFTimeSeriesType:
         self.stop_loss_line = []
         self.time_index_list = []
 
+class StopLossEventType(Enum):
+    stop = 'stop'
+    minimum = 'minimum'
+    activate = 'activate'
+
+class StopLossEventLogType:
+    index: int
+    event: StopLossEventType
+    price: float
+
+    def __init__(self):
+        self.index = 0
+        self.event = StopLossEventType.stop
+        self.price = 0.0
+
+
 class VFStopsResultType:
     derived: VFStopLossRawResultType
     alternate: VFStopLossRawResultType
@@ -65,7 +81,7 @@ class VFStopsResultType:
     current_max: float
     fund_name: str
     data_sets: List[VFTimeSeriesType]
-    event_log: list
+    event_log: List[StopLossEventLogType]
 
     def __init__(self):
         self.fund_name = ""
@@ -87,22 +103,6 @@ class SmartMovingAvgType:
         self.data_set = []
         self.short_slope = []
         self.long_slope = []
-
-
-class StopLossEventType(Enum):
-    stop = 'stop'
-    minimum = 'minimum'
-    activate = 'activate'
-
-class StopLossEventLogType:
-    index: int
-    event: StopLossEventType
-    price: float
-
-    def __init__(self):
-        self.index = 0
-        self.event = StopLossEventType.stop
-        self.price = 0.0
 
 
 ################################################################
