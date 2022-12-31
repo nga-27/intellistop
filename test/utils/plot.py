@@ -1,5 +1,11 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, List
+import datetime
+
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.patches import Rectangle
+
+from intellistop import VQTimeSeriesType
 
 # https://matplotlib.org/stable/gallery/color/named_colors.html
 
@@ -144,4 +150,58 @@ def plot_with_circles(dataset: list, list_of_circles: Tuple[int, float], config:
         plt.savefig(config.save_path)
     if config.has_output:
         plt.show()
+    plt.close(fig)
+
+
+def app_plot(prices: list,
+             dates: list,
+             stop_loss_objects: List[VQTimeSeriesType],
+             green_zone_x_values: List[list],
+             red_zone_x_values: List[list],
+             yellow_zone_x_values: List[list],
+             y_range: float,
+             minimum: float,
+             config: dict = {},
+             legend: list = []):
+    plot_config = PlotConfig(config)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+    date_indexes = [datetime.datetime.strptime(date, '%Y-%m-%d').date() for date in dates]
+    ax.plot(date_indexes, prices, color='black')
+
+    y_start = minimum - (y_range * 0.05)
+    height = y_range * 0.02
+
+    for stop in stop_loss_objects:
+        sub_dates = [date_indexes[index] for index in stop.time_index_list]
+        ax.plot(sub_dates, stop.caution_line, color='gold')
+        ax.plot(sub_dates, stop.stop_loss_line, color='red')
+
+    for green_zone in green_zone_x_values:
+        start = mdates.date2num(date_indexes[green_zone[0]])
+        end = mdates.date2num(date_indexes[green_zone[-1]])
+        width = end - start
+        ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='green', facecolor='green', fill=True))
+
+    for red_zone in red_zone_x_values:
+        start = mdates.date2num(date_indexes[red_zone[0]])
+        end = mdates.date2num(date_indexes[red_zone[-1]])
+        width = end - start
+        ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='red', facecolor='red', fill=True))
+
+    for yellow_zone in yellow_zone_x_values:
+        start = mdates.date2num(date_indexes[yellow_zone[0]])
+        end = mdates.date2num(date_indexes[yellow_zone[-1]])
+        width = end - start
+        ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='yellow', facecolor='yellow', fill=True))
+
+    ax.set_title(plot_config.title)
+    ax.legend(legend)
+
+    if plot_config.save_plot:
+        plt.savefig(plot_config.save_path)
+    if plot_config.has_output:
+        plt.show()
+
     plt.close(fig)
