@@ -21,12 +21,11 @@ class YFProperties:
             self.num_samples_per_calendar_year = 12
 
 
-class VQProperties:
-    std_level: int = 2
+class VFProperties:
     pricing: str = 'Close'
 
 
-class VQStopLossResultType:
+class VFStopLossResultType:
     aggressive: float
     average: float
     conservative: float
@@ -38,15 +37,15 @@ class VQStopLossResultType:
         self.conservative = 0.0
         self.curated = 0.0
 
-class VQStopLossRawResultType:
+class VFStopLossRawResultType:
     stop_loss: float
-    vq: float
+    vf: float
 
     def __init__(self):
         self.stop_loss = 0.0
-        self.vq = 0.0
+        self.vf = 0.0
 
-class VQTimeSeriesType:
+class VFTimeSeriesType:
     max_price: float
     caution_line: List[float]
     stop_loss_line: List[float]
@@ -58,23 +57,23 @@ class VQTimeSeriesType:
         self.stop_loss_line = []
         self.time_index_list = []
 
-class VQStopsResultType:
-    derived: VQStopLossRawResultType
-    alternate: VQStopLossRawResultType
-    vq: VQStopLossResultType
-    stop_loss: VQStopLossResultType
+class VFStopsResultType:
+    derived: VFStopLossRawResultType
+    alternate: VFStopLossRawResultType
+    vf: VFStopLossResultType
+    stop_loss: VFStopLossResultType
     current_max: float
     fund_name: str
-    data_sets: List[VQTimeSeriesType]
+    data_sets: List[VFTimeSeriesType]
     event_log: list
 
     def __init__(self):
         self.fund_name = ""
         self.current_max = 0.0
-        self.alternate = VQStopLossRawResultType()
-        self.derived = VQStopLossRawResultType()
-        self.vq = VQStopLossResultType()
-        self.stop_loss = VQStopLossResultType()
+        self.alternate = VFStopLossRawResultType()
+        self.derived = VFStopLossRawResultType()
+        self.vf = VFStopLossResultType()
+        self.stop_loss = VFStopLossResultType()
         self.data_sets = []
         self.event_log = []
 
@@ -110,7 +109,7 @@ class StopLossEventLogType:
 
 class ConfigProperties:
     yf_properties = YFProperties()
-    vq_properties = VQProperties()
+    vf_properties = VFProperties()
 
     def __init__(self, config: dict = {}):
         self.yf_properties.interval = config.get("interval", self.yf_properties.interval)
@@ -119,5 +118,4 @@ class ConfigProperties:
         self.yf_properties.end_date = config.get("end_date")
         self.yf_properties.include_bench = config.get("include_bench", self.yf_properties.include_bench)
 
-        self.vq_properties.std_level = config.get("vq_properties_level", self.vq_properties.std_level)
-        self.vq_properties.pricing = config.get("vq_properties_pricing", self.vq_properties.pricing)
+        self.vf_properties.pricing = config.get("vf_properties_pricing", self.vf_properties.pricing)

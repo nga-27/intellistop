@@ -1,17 +1,27 @@
 from typing import Union, Tuple, List
 import datetime
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.patches import Rectangle
 
-from intellistop import VQTimeSeriesType
+from intellistop import VFTimeSeriesType
 
-# https://matplotlib.org/stable/gallery/color/named_colors.html
 
 COLORS = [
     'black', 'orange', 'blue', 'teal', 'lawngreen', 'fuchsia', 'red', 'gold', 'forestgreen', 'purple'
 ]
+
+PLOT_DIR = Path("output").resolve().mkdir(exist_ok=True)
+PLOT_CONFIG = {
+    "save_path": "",
+    "save_plot": True,
+    "has_output": False,
+    "title": "",
+    "dual_axes": False,
+    "force_plot_second_y": False
+}
 
 class PlotConfig:
     title: str
@@ -28,6 +38,18 @@ class PlotConfig:
         self.has_output = config.get('has_output', True)
         self.dual_axes = config.get('dual_axes', False)
         self.force_plot_second_y = config.get('force_plot_second_y', False)
+
+
+def set_plot_config(file_name: str, title: str, view: bool = False,
+                    dual_axes: bool = False, force_plot_y: bool = False) -> dict:
+    new_config = PLOT_CONFIG.copy()
+    new_config["save_path"] = Path(f"output/{file_name}").resolve()
+    new_config["title"] = title
+    new_config["dual_axes"] = dual_axes
+    new_config["force_plot_second_y"] = force_plot_y
+    new_config["save_plot"] = True
+    new_config["has_output"] = view
+    return new_config
 
 
 def plot_result(dataset: list, stop_loss: Union[float,list], config: dict, legend: list = ['Stop Loss']):
@@ -153,15 +175,26 @@ def plot_with_circles(dataset: list, list_of_circles: Tuple[int, float], config:
     plt.close(fig)
 
 
-def app_plot(prices: list,
-             dates: list,
-             stop_loss_objects: List[VQTimeSeriesType],
-             green_zone_x_values: List[list],
-             red_zone_x_values: List[list],
-             yellow_zone_x_values: List[list],
-             y_range: float,
-             minimum: float,
-             config: dict = {}):
+def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType],
+             green_zone_x_values: List[list], red_zone_x_values: List[list],
+             yellow_zone_x_values: List[list], y_range: float, minimum: float, config: dict = {}):
+    """app_plot
+
+    Primary plotting function that generates the standalone app's visual output. The default is
+    that this plot is rendered live as well as stored in output/.
+
+    Args:
+        prices (list): close/adjusted close prices
+        dates (list): dates of the prices
+        stop_loss_objects (List[VFTimeSeriesType]): objects that contain stop losses, caution lines,
+        etc.
+        green_zone_x_values (List[list]): list of lists of the green / buy zone
+        red_zone_x_values (List[list]): list of lists of the red / stopped-out zones
+        yellow_zone_x_values (List[list]): list of lists of the yellow / caution zone
+        y_range (float): range of max value and min value of data set (includes VFTimeSeriesType)
+        minimum (float): minimum of the value of data set (includes VFTimeSeriesType)
+        config (dict, optional): plot config options. Defaults to {}.
+    """
     plot_config = PlotConfig(config)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -181,19 +214,46 @@ def app_plot(prices: list,
         start = mdates.date2num(date_indexes[green_zone[0]])
         end = mdates.date2num(date_indexes[green_zone[-1]])
         width = end - start
-        ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='green', facecolor='green', fill=True))
+        ax.add_patch(
+            Rectangle(
+                (start, y_start),
+                width,
+                height,
+                edgecolor='green',
+                facecolor='green',
+                fill=True
+            )
+        )
 
     for red_zone in red_zone_x_values:
         start = mdates.date2num(date_indexes[red_zone[0]])
         end = mdates.date2num(date_indexes[red_zone[-1]])
         width = end - start
-        ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='red', facecolor='red', fill=True))
+        ax.add_patch(
+            Rectangle(
+                (start, y_start),
+                width,
+                height,
+                edgecolor='red',
+                facecolor='red',
+                fill=True
+            )
+        )
 
     for yellow_zone in yellow_zone_x_values:
         start = mdates.date2num(date_indexes[yellow_zone[0]])
         end = mdates.date2num(date_indexes[yellow_zone[-1]])
         width = end - start
-        ax.add_patch(Rectangle((start, y_start), width, height, edgecolor='yellow', facecolor='yellow', fill=True))
+        ax.add_patch(
+            Rectangle(
+                (start, y_start),
+                width,
+                height,
+                edgecolor='yellow',
+                facecolor='yellow',
+                fill=True
+            )
+        )
 
     ax.set_title(plot_config.title)
 

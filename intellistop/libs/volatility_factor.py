@@ -2,28 +2,7 @@ from typing import Tuple, List
 import math
 import numpy as np
 
-from .lib_types import StopLossEventLogType, StopLossEventType, VQTimeSeriesType
-
-
-def find_latest_max(data_set: list, last_values=100) -> float:
-    max_val = 0.0
-    for i in range(len(data_set)-1, len(data_set)-last_values, -1):
-        if data_set[i] > max_val:
-            max_val = data_set[i]
-    return max_val
-
-
-def get_stop_loss_from_list(price_list: list, vq: float) -> Tuple[float, float, int]:
-    current_max_value = 0.0
-    current_max_index = 0
-    current_stop_loss = 0.0
-    for i, price in enumerate(price_list):
-        if price > current_max_value:
-            current_max_value = price
-            current_max_index = i
-            current_stop_loss = price * (1.0 - (vq / 100.0))
-
-    return current_stop_loss, current_max_value, current_max_index
+from .lib_types import StopLossEventLogType, StopLossEventType, VFTimeSeriesType
 
 
 def get_stop_loss_from_value(max_price: float, vf: float, isUpFrom: bool = False) -> float:
@@ -36,12 +15,9 @@ def get_caution_line_from_value(max_price: float, vf: float) -> float:
     return max_price * (1.0 - (0.6 * vf / 100.0))
 
 
-def generate_stop_loss_data_set(data: list,
-                                vf: float,
-                                smart_moving_average: list,
-                                smma_short_slope: list,
-                                smma_long_slope: list) -> Tuple[
-                                    List[VQTimeSeriesType], List[StopLossEventLogType]]:
+def generate_stop_loss_data_set(data: list, vf: float, smart_moving_average: list,
+                                smma_short_slope: list, smma_long_slope: list) -> Tuple[
+                                    List[VFTimeSeriesType], List[StopLossEventLogType]]:
     stop_loss_objects = []
     stop_loss_logs = []
 
@@ -50,7 +26,7 @@ def generate_stop_loss_data_set(data: list,
     mode = 'active'
     reset_stop = [False, False, False, False, False]
 
-    sl_data = VQTimeSeriesType()
+    sl_data = VFTimeSeriesType()
     sl_data.caution_line.append(get_caution_line_from_value(data[0], vf))
     sl_data.max_price = data[0]
     sl_data.stop_loss_line.append(get_stop_loss_from_value(data[0], vf))
@@ -92,7 +68,7 @@ def generate_stop_loss_data_set(data: list,
                 log.event = StopLossEventType.minimum
                 stop_loss_logs.append(log)
 
-            # Next, price has to rebound 1 VQ % (once)
+            # Next, price has to rebound 1 VF % (once)
             if data[i] >= get_stop_loss_from_value(current_min[1], vf, isUpFrom=True) and not reset_stop[0]:
                 reset_stop[0] = True
 
@@ -125,7 +101,7 @@ def generate_stop_loss_data_set(data: list,
                 current_max[1] = data[i]
                 current_max[0] = i
                 
-                sl_data = VQTimeSeriesType()
+                sl_data = VFTimeSeriesType()
                 sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], vf))
                 sl_data.max_price = data[i]
                 sl_data.time_index_list.append(i)

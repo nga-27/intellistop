@@ -22,10 +22,10 @@ To run the standalone program, the one that will generate a plot image with a re
 
 # Entry Signal Triggers
 
-1. Security's price must rise more than 1 VQ from its lowest bottom since it hit the red/stop zone
+1. Security's price must rise more than 1 VF from its lowest bottom since it hit the red/stop zone
 2. _Slope_ of the "smart moving average" (their trendline) must rise above a specific threshold
 
-(VQ may only need about a year's worth of data to compute, according to docs.)
+(VF may only need about a year's worth of data to compute, according to docs.)
 
 ## Smart Moving Average (SmMA)
 
@@ -33,7 +33,7 @@ To run the standalone program, the one that will generate a plot image with a re
 
 Using the "created" SmMA, we'll look at a few conditions. Our targeted **BUY** signal is after the following 4 conditions are achieved:
 
-1. Price rides 1 VQ (%) above bottom / minimum
+1. Price rides 1 VF (%) above bottom / minimum
 2. Price rides above the SmMA
 3. SMA-15(Slope(SmMA[k])) > 0
 4. SMA-50(Slope(SmMA[k])) > 0
@@ -41,9 +41,9 @@ Using the "created" SmMA, we'll look at a few conditions. Our targeted **BUY** s
 
 ### Prospective algorithm
 
-1. Calculate VQ
+1. Calculate VF
 2. Fetch larger data set.
-3. Set extrema mask percent (threshold between local maxima and minima, some % of VQ).
+3. Set extrema mask percent (threshold between local maxima and minima, some % of VF).
 4. Generate list of extrema points.
 5. Iteratively determine what period of SmMA fits the extrema criteria the best (with the lowest overall variance)
 6. Find the Green-Yellow-Red zones of a fund
