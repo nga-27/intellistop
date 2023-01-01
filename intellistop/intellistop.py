@@ -270,8 +270,6 @@ class IntelliStop:
             else:
                 self.stops.current_status.status = CurrentStatusType.caution_zone
 
-        print(self.stops.current_status.status)
-
         return self.stops.data_sets
 
 
