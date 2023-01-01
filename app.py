@@ -21,7 +21,6 @@ def run_app():
     print(f"Starting 'Intellistop' with fund ticker '{fund}'...")
 
     vf_data = stops.run_analysis_for_ticker(fund)
-    print(vf_data.stop_loss.curated)
     close = stops.return_data(fund)
     dates = stops.return_data(fund, key='__full__').get('Date', [])
 

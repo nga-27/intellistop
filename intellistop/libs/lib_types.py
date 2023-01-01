@@ -76,7 +76,7 @@ class StopLossEventLogType:
 
 
 class CurrentStatusType(Enum):
-    active_zone = "active_zone",
+    active_zone = "active_zone"
     caution_zone = "caution_zone"
     stopped_out = "stopped_out"
 
