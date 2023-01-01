@@ -29,6 +29,7 @@ def generate_stop_loss_data_set(data: list, vf: float, smart_moving_average: lis
     sl_data = VFTimeSeriesType()
     sl_data.caution_line.append(get_caution_line_from_value(data[0], vf))
     sl_data.max_price = data[0]
+    sl_data.max_price_index = 0
     sl_data.stop_loss_line.append(get_stop_loss_from_value(data[0], vf))
     sl_data.time_index_list.append(0)
 
@@ -38,6 +39,7 @@ def generate_stop_loss_data_set(data: list, vf: float, smart_moving_average: lis
                 current_max[1] = data[i]
                 current_max[0] = i
                 sl_data.max_price = data[i]
+                sl_data.max_price_index = i
                 sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], vf))
                 sl_data.time_index_list.append(i)
                 sl_data.caution_line.append(get_caution_line_from_value(data[i], vf))
@@ -104,6 +106,7 @@ def generate_stop_loss_data_set(data: list, vf: float, smart_moving_average: lis
                 sl_data = VFTimeSeriesType()
                 sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], vf))
                 sl_data.max_price = data[i]
+                sl_data.max_price_index = i
                 sl_data.time_index_list.append(i)
                 sl_data.caution_line.append(get_caution_line_from_value(data[i], vf))
 

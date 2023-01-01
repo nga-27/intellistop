@@ -13,6 +13,10 @@ def run_app():
     fund = input("Enter a fund ticker symbol: ").upper()
     print("")
 
+    if len(fund) == 0:
+        print("ERROR: No fund ticker entered on input. Exiting...")
+        return
+
     stops = IntelliStop()
     vf_data = stops.run_analysis_for_ticker(fund)
     close = stops.return_data(fund)

@@ -47,12 +47,14 @@ class VFStopLossRawResultType:
 
 class VFTimeSeriesType:
     max_price: float
+    max_price_index: int
     caution_line: List[float]
     stop_loss_line: List[float]
     time_index_list: List[int]
 
     def __init__(self):
         self.max_price = 0.0
+        self.max_price_index = 0
         self.caution_line = []
         self.stop_loss_line = []
         self.time_index_list = []
@@ -73,19 +75,28 @@ class StopLossEventLogType:
         self.price = 0.0
 
 
+class CurrentMaxDataType:
+    price: float
+    date: str
+
+    def __init__(self, price = 0.0, date = ""):
+        self.price = price
+        self.date = date
+
+
 class VFStopsResultType:
     derived: VFStopLossRawResultType
     alternate: VFStopLossRawResultType
     vf: VFStopLossResultType
     stop_loss: VFStopLossResultType
-    current_max: float
+    current_max: CurrentMaxDataType
     fund_name: str
     data_sets: List[VFTimeSeriesType]
     event_log: List[StopLossEventLogType]
 
     def __init__(self):
         self.fund_name = ""
-        self.current_max = 0.0
+        self.current_max = CurrentMaxDataType()
         self.alternate = VFStopLossRawResultType()
         self.derived = VFStopLossRawResultType()
         self.vf = VFStopLossResultType()
