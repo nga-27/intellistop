@@ -75,13 +75,21 @@ class StopLossEventLogType:
         self.price = 0.0
 
 
-class CurrentMaxDataType:
-    price: float
-    date: str
+class CurrentStatusType(Enum):
+    active_zone = "active_zone",
+    caution_zone = "caution_zone"
+    stopped_out = "stopped_out"
+
+
+class CurrentInfoType:
+    max_price: float
+    max_price_date: str
+    status: CurrentStatusType
 
     def __init__(self, price = 0.0, date = ""):
-        self.price = price
-        self.date = date
+        self.max_price = price
+        self.max_price_date = date
+        self.status = CurrentStatusType.active_zone
 
 
 class VFStopsResultType:
@@ -89,14 +97,14 @@ class VFStopsResultType:
     alternate: VFStopLossRawResultType
     vf: VFStopLossResultType
     stop_loss: VFStopLossResultType
-    current_max: CurrentMaxDataType
+    current_status: CurrentInfoType
     fund_name: str
     data_sets: List[VFTimeSeriesType]
     event_log: List[StopLossEventLogType]
 
     def __init__(self):
         self.fund_name = ""
-        self.current_max = CurrentMaxDataType()
+        self.current_status = CurrentInfoType()
         self.alternate = VFStopLossRawResultType()
         self.derived = VFStopLossRawResultType()
         self.vf = VFStopLossResultType()

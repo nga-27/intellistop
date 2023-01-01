@@ -1,7 +1,7 @@
 from .api import download_data
 from .constants import YF_DATA_CONFIG_DEFAULTS
 from .lib_types import (
-    ConfigProperties, VFStopsResultType, SmartMovingAvgType, VFTimeSeriesType
+    ConfigProperties, VFStopsResultType, SmartMovingAvgType, VFTimeSeriesType, CurrentStatusType
 )
 from .variances import calculate_time_series_variances
 from .volatility_factor import (
