@@ -5,7 +5,7 @@ from .lib_types import (
 )
 from .variances import calculate_time_series_variances
 from .volatility_factor import (
-    get_stop_loss_from_value, generate_stop_loss_data_set
+    get_stop_loss_from_value, generate_stop_loss_data_set, get_current_stop_loss_values
 )
 from .filters import (
     simple_moving_average_filter, smart_moving_average, get_slope_of_data_set

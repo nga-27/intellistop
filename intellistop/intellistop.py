@@ -7,7 +7,7 @@ from .libs import (
     download_data, ConfigProperties, VFStopsResultType, get_fourier_spectrum,
     calculate_time_series_variances, simple_moving_average_filter, smart_moving_average,
     SmartMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set, VFTimeSeriesType,
-    CurrentStatusType
+    CurrentStatusType, get_current_stop_loss_values
 )
 
 class IntelliStop:
@@ -269,6 +269,11 @@ class IntelliStop:
                 self.stops.current_status.status = CurrentStatusType.active_zone
             else:
                 self.stops.current_status.status = CurrentStatusType.caution_zone
+
+        self.stops.stop_loss = get_current_stop_loss_values(
+            self.stops.vf,
+            self.stops.data_sets[-1].max_price
+        )
 
         return self.stops.data_sets
 

@@ -2,7 +2,9 @@ from typing import Tuple, List
 import math
 import numpy as np
 
-from .lib_types import StopLossEventLogType, StopLossEventType, VFTimeSeriesType
+from .lib_types import (
+    StopLossEventLogType, StopLossEventType, VFTimeSeriesType, VFStopLossResultType
+)
 
 
 def get_stop_loss_from_value(max_price: float, vf: float, isUpFrom: bool = False) -> float:
@@ -13,6 +15,19 @@ def get_stop_loss_from_value(max_price: float, vf: float, isUpFrom: bool = False
 
 def get_caution_line_from_value(max_price: float, vf: float) -> float:
     return max_price * (1.0 - (0.6 * vf / 100.0))
+
+
+def get_current_stop_loss_values(current_vfs: VFStopLossResultType,
+                                 current_max: float) -> VFStopLossResultType:
+    current_sl = VFStopLossResultType()
+    current_sl.aggressive = get_stop_loss_from_value(current_max, current_vfs.aggressive)
+    current_sl.average = get_stop_loss_from_value(current_max, current_vfs.average)
+    current_sl.curated = get_stop_loss_from_value(current_max, current_vfs.curated)
+    current_sl.conservative = get_stop_loss_from_value(current_max, current_vfs.conservative)
+
+    if current_vfs.curated > 50.0:
+        current_sl.curated = get_stop_loss_from_value(current_max, 50.0)
+    return current_sl
 
 
 def generate_stop_loss_data_set(data: list, vf: float, smart_moving_average: list,
