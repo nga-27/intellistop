@@ -18,6 +18,8 @@ def run_app():
         return
 
     stops = IntelliStop()
+    print(f"Starting 'Intellistop' with fund ticker '{fund}'...")
+
     vf_data = stops.run_analysis_for_ticker(fund)
     close = stops.return_data(fund)
     dates = stops.return_data(fund, key='__full__').get('Date', [])

@@ -297,7 +297,6 @@ class IntelliStop:
                     data_sets: List[VFTimeSeriesType]
                     event_log: list
         """
-        print(f"Starting 'Intellistop' with fund ticker '{fund}'...")
         self.fetch_extended_time_series(fund)
         self.calculate_vf_stops_data()
         self.generate_smart_moving_average()
