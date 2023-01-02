@@ -22,7 +22,8 @@ PLOT_CONFIG = {
     "has_output": False,
     "title": "",
     "dual_axes": False,
-    "force_plot_second_y": False
+    "force_plot_second_y": False,
+    "vf_sl_box_str": ""
 }
 
 class PlotConfig:
@@ -34,6 +35,7 @@ class PlotConfig:
     has_output: bool
     dual_axes: bool
     force_plot_second_y: bool
+    vf_sl_box_str: str
 
     def __init__(self, config: Union[dict, None] = None):
         if not config:
@@ -44,13 +46,15 @@ class PlotConfig:
         self.has_output = config.get('has_output', True)
         self.dual_axes = config.get('dual_axes', False)
         self.force_plot_second_y = config.get('force_plot_second_y', False)
+        self.vf_sl_box_str = config.get('vf_sl_box_str', "")
 
 
 def set_plot_config(file_name: str,
                     title: str,
                     view: bool = False,
                     dual_axes: bool = False,
-                    force_plot_y: bool = False) -> dict:
+                    force_plot_y: bool = False,
+                    vf_stop_loss_text: str = "") -> dict:
     """set_plot_config
 
     Args:
@@ -71,6 +75,7 @@ def set_plot_config(file_name: str,
     new_config["force_plot_second_y"] = force_plot_y
     new_config["save_plot"] = True
     new_config["has_output"] = view
+    new_config["vf_sl_box_str"] = vf_stop_loss_text
     return new_config
 
 
@@ -362,6 +367,16 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
             0.02,
             text_str,
             color=str_color,
+            transform=ax_handle.transAxes,
+            bbox=props
+        )
+
+    if len(plot_config.vf_sl_box_str) > 0:
+        props = dict(boxstyle='round', facecolor='white', alpha=0.25)
+        ax_handle.text(
+            0.02,
+            0.90,
+            plot_config.vf_sl_box_str,
             transform=ax_handle.transAxes,
             bbox=props
         )

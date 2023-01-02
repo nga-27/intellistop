@@ -1,3 +1,4 @@
+""" app.py """
 import numpy as np
 
 from intellistop import IntelliStop
@@ -9,6 +10,7 @@ def run_app():
 
     Primary application function that runs the standalone process
     """
+    # pylint: disable=too-many-branches,too-many-locals
     print("")
     fund = input("Enter a fund ticker symbol: ").upper()
     print("")
@@ -55,7 +57,7 @@ def run_app():
 
     min_value = min(
         [
-            min([min(vf_obj.stop_loss_line) for vf_obj in vf_data.data_sets]),
+            min(min(vf_obj.stop_loss_line) for vf_obj in vf_data.data_sets),
             min(close)
         ]
     )
@@ -70,9 +72,16 @@ def run_app():
         status_string = f"{fund} is currently in a caution state. HOLD."
         status_color = 'yellow'
 
+    shown_stop_loss = f"VF: {np.round(vf_data.vf.curated, 3)}\n"
+    if vf_data.current_status.status.value != 'stopped_out':
+        shown_stop_loss += f"Stop Loss: ${np.round(vf_data.stop_loss.curated, 2)}"
+    else:
+        shown_stop_loss += "Stop Loss: n/a"
+
     plot_config = plot.set_plot_config(
         f"{fund}_stop_losses.png",
-        f"{fund} - Stop Loss Analysis (VF: {np.round(vf_data.vf.curated, 3)})",
+        f"{fund} - Stop Loss Analysis",
+        vf_stop_loss_text=shown_stop_loss,
         view=True
     )
     plot.app_plot(
