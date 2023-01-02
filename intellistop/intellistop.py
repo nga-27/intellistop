@@ -133,7 +133,8 @@ class IntelliStop:
         data_key = self.config.vf_properties.pricing
         current_max = max(self.data[self.fund_name][data_key])
         self.stops.current_status.max_price = current_max
-        self.stops.current_status.max_price_date = self.data[self.fund_name][data_key].index(current_max)
+        self.stops.current_status.max_price_date = \
+            self.data[self.fund_name][data_key].index(current_max)
         self.stops.fund_name = self.fund_name
 
         sma = simple_moving_average_filter(self.data[self.fund_name][data_key], filter_size=200)
@@ -261,7 +262,7 @@ class IntelliStop:
         self.stops.current_status.max_price = np.round(self.stops.data_sets[-1].max_price, 2)
         self.stops.current_status.max_price_date = self.data[self.fund_name]['Date']\
             [self.stops.data_sets[-1].max_price_index]
-        
+
         if self.stops.data_sets[-1].time_index_list[-1] != len(data) - 1:
             self.stops.current_status.status = CurrentStatusType.stopped_out
         else:
