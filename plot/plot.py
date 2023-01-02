@@ -177,7 +177,8 @@ def plot_with_circles(dataset: list, list_of_circles: Tuple[int, float], config:
 
 def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType],
              green_zone_x_values: List[list], red_zone_x_values: List[list],
-             yellow_zone_x_values: List[list], y_range: float, minimum: float, config: dict = {}):
+             yellow_zone_x_values: List[list], y_range: float, minimum: float, config: dict = {},
+             text_str: str = "", str_color: str = ""):
     """app_plot
 
     Primary plotting function that generates the standalone app's visual output. The default is
@@ -187,17 +188,19 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
         prices (list): close/adjusted close prices
         dates (list): dates of the prices
         stop_loss_objects (List[VFTimeSeriesType]): objects that contain stop losses, caution lines,
-        etc.
+            etc.
         green_zone_x_values (List[list]): list of lists of the green / buy zone
         red_zone_x_values (List[list]): list of lists of the red / stopped-out zones
         yellow_zone_x_values (List[list]): list of lists of the yellow / caution zone
         y_range (float): range of max value and min value of data set (includes VFTimeSeriesType)
         minimum (float): minimum of the value of data set (includes VFTimeSeriesType)
+
         config (dict, optional): plot config options. Defaults to {}.
+        text_str (str, optional): text box for notes displayed
+        str_color (str, optional): color for notes displayed
     """
     plot_config = PlotConfig(config)
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
+    fig, ax = plt.subplots()
 
     date_indexes = [datetime.datetime.strptime(date, '%Y-%m-%d').date() for date in dates]
     ax.plot(date_indexes, prices, color='black')
@@ -256,6 +259,13 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
         )
 
     ax.set_title(plot_config.title)
+
+    if len(text_str) > 0 and len(str_color) > 0:
+        new_start = minimum - (y_range * 0.2)
+        new_end = minimum + (y_range * 1.02)
+        ax.set_ylim(new_start, new_end)
+        props = dict(boxstyle='round', facecolor='white', alpha=0.25)
+        ax.text(0.02, 0.02, text_str, color=str_color, transform=ax.transAxes, bbox=props)
 
     if plot_config.save_plot:
         plt.savefig(plot_config.save_path)

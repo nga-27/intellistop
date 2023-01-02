@@ -61,6 +61,15 @@ def run_app():
     )
     range_value = max(close) - min_value
 
+    status_string = f"{fund} is currently in a green zone. BUY."
+    status_color = 'green'
+    if vf_data.current_status.status.value == 'stopped_out':
+        status_string = f"{fund} is currently STOPPED OUT. SELL / wait for a re-entry signal."
+        status_color = 'red'
+    elif vf_data.current_status.status.value == 'caution_zone':
+        status_string = f"{fund} is currently in a caution state. HOLD."
+        status_color = 'yellow'
+
     plot_config = plot.set_plot_config(
         f"{fund}_stop_losses.png",
         f"{fund} - Stop Loss Analysis (VF: {np.round(vf_data.vf.curated, 3)})",
@@ -75,7 +84,9 @@ def run_app():
         yellow_zones,
         range_value,
         min_value,
-        config=plot_config
+        config=plot_config,
+        text_str=status_string,
+        str_color=status_color
     )
 
 
