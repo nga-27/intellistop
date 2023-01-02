@@ -12,9 +12,15 @@ def download_data(fund: str, config: ConfigProperties) -> dict:
 
     if config.yf_properties.include_bench:
         fund += " ^GSPC"
-    
+
     if start_date and end_date:
-        data = yf.download(tickers=fund, start=start_date, end=end_date, interval=interval, group_by='ticker')
+        data = yf.download(
+            tickers=fund,
+            start=start_date,
+            end=end_date,
+            interval=interval,
+            group_by='ticker'
+        )
     elif start_date:
         data = yf.download(tickers=fund, start=start_date, interval=interval, group_by='ticker')
     else:
@@ -25,7 +31,7 @@ def download_data(fund: str, config: ConfigProperties) -> dict:
 
 def data_format(yf_data: pd.DataFrame, fund_name: str) -> dict:
     corrected_data = {}
-    
+
     if 'Close' in yf_data.columns:
         # Single fund that's not in the "multiIndex" format
         corrected_data[fund_name] = {}
@@ -34,6 +40,7 @@ def data_format(yf_data: pd.DataFrame, fund_name: str) -> dict:
         corrected_data[fund_name]["Date"] = [date.strftime("%Y-%m-%d") for date in yf_data.index]
         for column in corrected_data[fund_name]:
             if column != "Date":
+                # pylint: disable=unnecessary-comprehension
                 corrected_data[fund_name][column] = [price for price in yf_data[column].values]
 
     else:
@@ -42,12 +49,12 @@ def data_format(yf_data: pd.DataFrame, fund_name: str) -> dict:
                 corrected_data[col[0]] = {}
             corrected_data[col[0]][col[1]] = {}
 
-        for fund_name in corrected_data:
-            corrected_data[fund_name]["Date"] = [date.strftime("%Y-%m-%d") for date in yf_data[fund_name].index]
-            for column in corrected_data[fund_name]:
+        for fund_ticker in corrected_data:
+            corrected_data[fund_ticker]["Date"] = [
+                date.strftime("%Y-%m-%d") for date in yf_data[fund_ticker].index]
+            for column in corrected_data[fund_ticker]:
                 if column != "Date":
-                    corrected_data[fund_name][column] = [price for price in yf_data[fund_name][column].values]
+                    corrected_data[fund_ticker][column] = [
+                        price for price in yf_data[fund_ticker][column].values]
 
     return corrected_data
-
-
