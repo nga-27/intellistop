@@ -3,6 +3,7 @@ import numpy as np
 
 from intellistop import IntelliStop
 from plot import plot
+from utils import startup
 
 
 def run_app():
@@ -11,6 +12,9 @@ def run_app():
     Primary application function that runs the standalone process
     """
     # pylint: disable=too-many-branches,too-many-locals
+    print("")
+    startup.logo_renderer()
+    startup.start_header()
     print("")
     fund = input("Enter a fund ticker symbol: ").upper()
     print("")
