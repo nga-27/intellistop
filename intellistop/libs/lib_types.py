@@ -132,8 +132,8 @@ class VFStopsResultType:
         self.event_log = []
 
 
-class SmartMovingAvgType:
-    """ Smart Moving Average Type """
+class IntelligentMovingAvgType:
+    """ Intelligent Moving Average Type """
     # pylint: disable=too-few-public-methods
     data_set: list
     short_slope: list

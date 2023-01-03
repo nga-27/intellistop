@@ -73,8 +73,8 @@ def weighted_moving_average_filter(data: list, filter_size: int = 50) -> list:
     return filtered
 
 
-def smart_moving_average(data: list, filter_size: int = 50) -> list:
-    """smart_moving_average
+def intelligent_moving_average(data: list, filter_size: int = 50) -> list:
+    """intelligent_moving_average
 
     A filter that takes the combination of simple, exponential, and weighted moving averages
     to generate a deeper moving average that combines traditional, typical market behavior (using

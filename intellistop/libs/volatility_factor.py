@@ -78,9 +78,9 @@ def get_current_stop_loss_values(current_vfs: VFStopLossResultType,
 
 def generate_stop_loss_data_set(data: list,
                                 volatility_factor: float,
-                                smart_moving_average: list,
-                                smma_short_slope: list,
-                                smma_long_slope: list) -> Tuple[
+                                intelligent_moving_average: list,
+                                ima_short_slope: list,
+                                ima_long_slope: list) -> Tuple[
                                     List[VFTimeSeriesType], List[StopLossEventLogType]]:
     """generate_stop_loss_data_set
 
@@ -90,9 +90,10 @@ def generate_stop_loss_data_set(data: list,
     Args:
         data (list): [Close or Adjusted] price
         volatility_factor (float): VF of the fund
-        smart_moving_average (list): data set of the smart moving average
-        smma_short_slope (list): the short slope of the smart moving average
-        smma_long_slope (list): the longer moving average of the slope of the smart moving average
+        intelligent_moving_average (list): data set of the intelligent moving average
+        ima_short_slope (list): the short slope of the intelligent moving average
+        ima_long_slope (list): the longer moving average of the slope of the intelligent moving
+            average
 
     Returns:
         Tuple[ List[VFTimeSeriesType], List[StopLossEventLogType]]
@@ -157,25 +158,25 @@ def generate_stop_loss_data_set(data: list,
                 reset_stop[0] = True
 
             # Next, price has to be above the SmMA (on-going condition, thus the reset)
-            if reset_stop[0] and data[i] > smart_moving_average[i]:
+            if reset_stop[0] and data[i] > intelligent_moving_average[i]:
                 reset_stop[1] = True
             else:
                 reset_stop[1] = False
 
             # Next, short-time slope of SmMA must be > 0 (on-going)
-            if reset_stop[1] and smma_short_slope[i] > 0.0:
+            if reset_stop[1] and ima_short_slope[i] > 0.0:
                 reset_stop[2] = True
             else:
                 reset_stop[2] = False
 
             # Next, long-time slope of SmMA must be > 0 (on-going)
-            if reset_stop[2] and smma_long_slope[i] > 0.0:
+            if reset_stop[2] and ima_long_slope[i] > 0.0:
                 reset_stop[3] = True
             else:
                 reset_stop[3] = True
 
             # Finally, short_slope > long_slope (on-going)
-            if reset_stop[3] and smma_short_slope[i] > smma_long_slope[i]:
+            if reset_stop[3] and ima_short_slope[i] > ima_long_slope[i]:
                 reset_stop[4] = True
 
             if all(reset_stop):

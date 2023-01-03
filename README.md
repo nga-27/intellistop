@@ -8,30 +8,59 @@ Library tool to determine a smart stop-loss for technical analysis of funds. Thi
 
 # What is Intellistop?
 
+Intellistop is a tool that derives some mathematical features of a fund's price that can help an investor better understand when to **buy** and **sell** a particular equity.
+
+First, the obvious disclaimer: ***the Intellistop tool and its author are not liable for any personal investing performance***. After all, there are a myriad of tools out there that can help an investor make investing decisions, and all of them basically say the same thing - _you're on your own_.
+
+Now, back to the tool...
+
+The tool centers around two philosophies:
+
+* Stop losses should be used to protect gains and assets, and
+* Price action remains within a factor of volatility _unless_ a major change to the trend occurs.
+
+Fellow Technical Analysts or Quants might deduce from the above that if an equity drops beyond its normal volatility range, then a larger change in trend might be starting. Since it's a drop, it might signal the start of a larger downward trend. If this conjecture is reasonable, then it would also be reasonable to suggest that the stop loss value should be somehow related to this normal volatility range.
+
+So... If there was a way to derive the correct normal volatility factor of a given equity, then it be possible to set a stop loss that would balance the benefit letting an equity have room to move around in a normal capacity with the protection of avoiding large losses on a larger downward trend. In this same vein, this similar method would be able suggest when a larger downward trend is ending and when it's a good time to re-enter a trade.
+
+This conjecture, at its heart, is the main function of **Intellistops**.
+
+Intellistops generates a [_volatility factor_](#vf) (VF) that is used to derive both a _stop loss for upward-trending equities_ and a _re-entry signal after a downward trend concludes_.
+
 ---
 
 # Installation
 
 To run the `IntelliStop` library as an import [in something else], simply run pip install as you normally would:
 
-`pip install .` (or `pip install '.'` for MacOS)
+```sh
+pip install .
+
+# For MacOS / or zsh
+pip install '.'
+```
 
 To run the standalone program, the one that will generate a plot image with a requested input ticker, install the additional `app` installations. (This primarily includes `matplotlib`):
 
-`pip install .[app]` (or `pip install '.[app]'` for MacOS)
+```sh
+pip install .[app]
+
+# For MacOS / or zsh
+pip install '.[app]'
+```
 
 # Entry Signal Triggers
 
-1. Security's price must rise more than 1 VF from its lowest bottom since it hit the red/stop zone
-2. _Slope_ of the "smart moving average" (their trendline) must rise above a specific threshold
+1. An equity's price must rise more than 1 Volatility Factor (**VF**) from its lowest bottom since it hit the red/stop zone
+2. _Slope_ of the "intelligent moving average" (the equity's trend line) must rise above a specific threshold
 
-(VF may only need about a year's worth of data to compute, according to docs.)
+The second of these triggers is derived from a Intelligent Moving Average, or IMA.
 
-## Smart Moving Average (SmMA)
+## Intelligent Moving Average (IMA)
 
 ### Algorithm
 
-Using the "created" SmMA, we'll look at a few conditions. Our targeted **BUY** signal is after the following 4 conditions are achieved:
+Using the "created" IMA, we'll look at a few conditions. Our targeted **BUY** signal is after the following 5 conditions are achieved:
 
 1. Price rides 1 VF (%) above bottom / minimum
 2. Price rides above the SmMA
@@ -39,18 +68,10 @@ Using the "created" SmMA, we'll look at a few conditions. Our targeted **BUY** s
 4. SMA-50(Slope(SmMA[k])) > 0
 5. SMA-15 > SMA-50
 
-### Prospective algorithm
-
-1. Calculate VF
-2. Fetch larger data set.
-3. Set extrema mask percent (threshold between local maxima and minima, some % of VF).
-4. Generate list of extrema points.
-5. Iteratively determine what period of SmMA fits the extrema criteria the best (with the lowest overall variance)
-6. Find the Green-Yellow-Red zones of a fund
-
 # <a name="vf"></a>Volatility Factor (VF)
 
-# Other Links
+Now it's math time. How is the Volatility Factor (VF) calculated?
 
-* [Tradesmith bootcamps](https://tradesmith.zendesk.com/hc/en-us/sections/5551499479956-TradeSmith-Bootcamp-Beginner-Lessons)
-* [Smart Moving Average (SmMA)](https://tradestops.com/blog/when-to-get-back-in/#:~:text=The%20Smart%20Moving%20Average%20tells,a%20bottom%20is%20in%20place.)
+$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
+
+[math](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions)

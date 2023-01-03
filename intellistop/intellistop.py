@@ -5,8 +5,8 @@ import numpy as np
 
 from .libs import (
     download_data, ConfigProperties, VFStopsResultType, get_fourier_spectrum,
-    calculate_time_series_variances, simple_moving_average_filter, smart_moving_average,
-    SmartMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set, VFTimeSeriesType,
+    calculate_time_series_variances, simple_moving_average_filter, intelligent_moving_average,
+    IntelligentMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set, VFTimeSeriesType,
     CurrentStatusType, get_current_stop_loss_values
 )
 
@@ -18,7 +18,7 @@ class IntelliStop:
     benchmark = "^GSPC"
     latest_results = None
     stops = VFStopsResultType()
-    smart_moving_avg = SmartMovingAvgType()
+    intelligent_moving_avg = IntelligentMovingAvgType()
     has_errors = False
 
     def __init__(self, config: Union[dict, None] = None):
@@ -201,11 +201,11 @@ class IntelliStop:
         return self.stops
 
 
-    def generate_smart_moving_average(self) -> Tuple[list, list, list]:
-        """generate_smart_moving_average
+    def generate_intelligent_moving_average(self) -> Tuple[list, list, list]:
+        """generate_intelligent_moving_average
 
         Returns:
-            Tuple[list, list, list]: SmartMovingAverage (SmMA), Short-term slope of SmMA,
+            Tuple[list, list, list]: IntelligentMovingAverage (SmMA), Short-term slope of SmMA,
                                     Long-term slope (SmMA)
         """
         if self.has_errors:
@@ -215,23 +215,25 @@ class IntelliStop:
         price_data = self.data[self.fund_name][data_key]
         window = 200 + int((self.stops.vf.curated - 25.0) / 4.0 * 3.0)
 
-        self.smart_moving_avg.data_set = smart_moving_average(price_data, window)
-        slope = get_slope_of_data_set(self.smart_moving_avg.data_set)
+        self.intelligent_moving_avg.data_set = intelligent_moving_average(price_data, window)
+        slope = get_slope_of_data_set(self.intelligent_moving_avg.data_set)
 
         short_window = 15
         long_window = 50
-        self.smart_moving_avg.short_slope = simple_moving_average_filter(slope, short_window)
-        self.smart_moving_avg.long_slope = simple_moving_average_filter(slope, long_window)
+        self.intelligent_moving_avg.short_slope = simple_moving_average_filter(slope, short_window)
+        self.intelligent_moving_avg.long_slope = simple_moving_average_filter(slope, long_window)
 
         # Because of how we generate the SMAs for x < filter_size, we want to just 0 them out to as
         # avoid any oddities with the "re-entry" algorithm
-        self.smart_moving_avg.short_slope[0:window + short_window] = [0.0] * (window + short_window)
-        self.smart_moving_avg.long_slope[0:window + long_window] = [0.0] * (window + long_window)
+        self.intelligent_moving_avg.short_slope[0:window + short_window] = [0.0] * \
+            (window + short_window)
+        self.intelligent_moving_avg.long_slope[0:window + long_window] = [0.0] * \
+            (window + long_window)
 
         return (
-            self.smart_moving_avg.data_set,
-            self.smart_moving_avg.short_slope,
-            self.smart_moving_avg.long_slope
+            self.intelligent_moving_avg.data_set,
+            self.intelligent_moving_avg.short_slope,
+            self.intelligent_moving_avg.long_slope
         )
 
 
@@ -254,9 +256,9 @@ class IntelliStop:
         self.stops.data_sets, self.stops.event_log = generate_stop_loss_data_set(
             data,
             volatility_factor,
-            self.smart_moving_avg.data_set,
-            self.smart_moving_avg.short_slope,
-            self.smart_moving_avg.long_slope
+            self.intelligent_moving_avg.data_set,
+            self.intelligent_moving_avg.short_slope,
+            self.intelligent_moving_avg.long_slope
         )
 
         self.stops.current_status.max_price = np.round(self.stops.data_sets[-1].max_price, 2)
@@ -305,7 +307,7 @@ class IntelliStop:
         """
         self.fetch_extended_time_series(fund)
         self.calculate_vf_stops_data()
-        self.generate_smart_moving_average()
+        self.generate_intelligent_moving_average()
         self.analyze_data_set()
 
         return self.stops
