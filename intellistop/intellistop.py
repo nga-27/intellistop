@@ -264,12 +264,12 @@ class IntelliStop:
             [self.stops.data_sets[-1].max_price_index]
 
         if self.stops.data_sets[-1].time_index_list[-1] != len(data) - 1:
-            self.stops.current_status.status = CurrentStatusType.stopped_out
+            self.stops.current_status.status = CurrentStatusType.STOPPED_OUT
         else:
             if data[-1] > self.stops.data_sets[-1].caution_line[-1]:
-                self.stops.current_status.status = CurrentStatusType.active_zone
+                self.stops.current_status.status = CurrentStatusType.ACTIVE_ZONE
             else:
-                self.stops.current_status.status = CurrentStatusType.caution_zone
+                self.stops.current_status.status = CurrentStatusType.CAUTION_ZONE
 
         self.stops.stop_loss = get_current_stop_loss_values(
             self.stops.vf,
