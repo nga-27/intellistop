@@ -11,7 +11,7 @@ def run_app():
 
     Primary application function that runs the standalone process
     """
-    # pylint: disable=too-many-branches,too-many-locals
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     print("")
     startup.logo_renderer()
     startup.start_header()
