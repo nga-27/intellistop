@@ -63,15 +63,13 @@ The second of these triggers is derived from a Intelligent Moving Average, or IM
 Using the "created" IMA, we'll look at a few conditions. Our targeted **BUY** signal is after the following 5 conditions are achieved:
 
 1. Price rides 1 VF (%) above bottom / minimum
-2. Price rides above the SmMA
-3. SMA-15(Slope(SmMA[k])) > 0
-4. SMA-50(Slope(SmMA[k])) > 0
-5. SMA-15 > SMA-50
+2. Price rides above the IMA
+3. $SMA_{15}[Slope[IMA[k]]] > 0$
+4. $SMA_{50}[Slope(IMA[k]]] > 0$
+5. $SMA_{15} > SMA_{50}$
 
 # <a name="vf"></a>Volatility Factor (VF)
 
 Now it's math time. How is the Volatility Factor (VF) calculated?
 
 [The Whitepaper](./static/volatility_factor.md)
-
-[math](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions)

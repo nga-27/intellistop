@@ -157,19 +157,19 @@ def generate_stop_loss_data_set(data: list,
                 and not reset_stop[0]:
                 reset_stop[0] = True
 
-            # Next, price has to be above the SmMA (on-going condition, thus the reset)
+            # Next, price has to be above the IMA (on-going condition, thus the reset)
             if reset_stop[0] and data[i] > intelligent_moving_average[i]:
                 reset_stop[1] = True
             else:
                 reset_stop[1] = False
 
-            # Next, short-time slope of SmMA must be > 0 (on-going)
+            # Next, short-time slope of IMA must be > 0 (on-going)
             if reset_stop[1] and ima_short_slope[i] > 0.0:
                 reset_stop[2] = True
             else:
                 reset_stop[2] = False
 
-            # Next, long-time slope of SmMA must be > 0 (on-going)
+            # Next, long-time slope of IMA must be > 0 (on-going)
             if reset_stop[2] and ima_long_slope[i] > 0.0:
                 reset_stop[3] = True
             else:

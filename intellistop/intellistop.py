@@ -205,8 +205,8 @@ class IntelliStop:
         """generate_intelligent_moving_average
 
         Returns:
-            Tuple[list, list, list]: IntelligentMovingAverage (SmMA), Short-term slope of SmMA,
-                                    Long-term slope (SmMA)
+            Tuple[list, list, list]: IntelligentMovingAverage (IMA), Short-term slope of IMA,
+                                    Long-term slope (IMA)
         """
         if self.has_errors:
             return ([], [], [])
