@@ -5,7 +5,7 @@ Setup tools
 Use setuptools to install package dependencies. Instead of a requirements file you
 can install directly from this file.
 `pip install .`
-You can install dev dependencies by targetting the appropriate key in extras_require
+You can install dev dependencies by targeting the appropriate key in extras_require
 ```
 pip install .[dev] # install requires and test requires
 pip install '.[dev]' # install for MAC OS / zsh
@@ -17,19 +17,19 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'intellistop'
-DESCRIPTION = 'Library to determine a smart stop-loss for technical analysis of funds.'
+DESCRIPTION = 'Library to determine a intelligent stop-loss for technical analysis of funds.'
 URL = 'https://github.mmm.com/nga-27/intellistop'
 EMAIL = 'namell91@gmail.com'
 AUTHOR = 'Nick Amell'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.3.0'
+VERSION = '1.0.0'
 
 # What packages are required for this module to be executed?
 REQUIRES = [
-    "numpy==1.24.1",#1.20.2",
-    "pandas==1.5.2",#1.2.4",
+    "numpy==1.24.1",
+    "pandas==1.5.2",
     "scipy==1.9.3",
-    "yfinance==0.2.3",#0.1.63",
+    "yfinance==0.2.3",
 ]
 
 REQUIRES_APP = [

@@ -1,2 +1,3 @@
+""" intellistop init """
 from .intellistop import IntelliStop
-from .libs import VQTimeSeriesType
+from .libs import VFTimeSeriesType

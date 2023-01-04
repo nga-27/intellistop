@@ -1,9 +1,12 @@
+""" library types """
 from enum import Enum
 from typing import Union, List
 
 from .constants import YF_DATA_CONFIG_DEFAULTS
 
 class YFProperties:
+    """ Yahoo Finance Properties """
+    # pylint: disable=too-few-public-methods
     period: str = YF_DATA_CONFIG_DEFAULTS["period"]
     interval: str = YF_DATA_CONFIG_DEFAULTS["interval"]
     start_date: Union[str,None] = None
@@ -21,12 +24,15 @@ class YFProperties:
             self.num_samples_per_calendar_year = 12
 
 
-class VQProperties:
-    std_level: int = 2
+class VFProperties:
+    """ Volatility Factor Properties """
+    # pylint: disable=too-few-public-methods
     pricing: str = 'Close'
 
 
-class VQStopLossResultType:
+class VFStopLossResultType:
+    """ Volatility Factor / Stop Loss Result Type """
+    # pylint: disable=too-few-public-methods
     aggressive: float
     average: float
     conservative: float
@@ -38,48 +44,97 @@ class VQStopLossResultType:
         self.conservative = 0.0
         self.curated = 0.0
 
-class VQStopLossRawResultType:
+class VFStopLossRawResultType:
+    """ Volatility Factor / Stop Loss Raw Result Type"""
+    # pylint: disable=too-few-public-methods,invalid-name
     stop_loss: float
-    vq: float
+    vf: float
 
     def __init__(self):
         self.stop_loss = 0.0
-        self.vq = 0.0
+        self.vf = 0.0
 
-class VQTimeSeriesType:
+class VFTimeSeriesType:
+    """ Volatility Factor Time Series Type """
+    # pylint: disable=too-few-public-methods
     max_price: float
+    max_price_index: int
     caution_line: List[float]
     stop_loss_line: List[float]
     time_index_list: List[int]
 
     def __init__(self):
         self.max_price = 0.0
+        self.max_price_index = 0
         self.caution_line = []
         self.stop_loss_line = []
         self.time_index_list = []
 
-class VQStopsResultType:
-    derived: VQStopLossRawResultType
-    alternate: VQStopLossRawResultType
-    vq: VQStopLossResultType
-    stop_loss: VQStopLossResultType
-    current_max: float
+class StopLossEventType(Enum):
+    """ Stop Loss Event Type Enumeration """
+    STOP = 'stop'
+    MINIMUM = 'minimum'
+    ACTIVATE = 'activate'
+
+class StopLossEventLogType:
+    """ Stop Loss Event Log Type """
+    # pylint: disable=too-few-public-methods
+    index: int
+    event: StopLossEventType
+    price: float
+
+    def __init__(self):
+        self.index = 0
+        self.event = StopLossEventType.STOP
+        self.price = 0.0
+
+
+class CurrentStatusType(Enum):
+    """ Current Status Type Enumeration """
+    ACTIVE_ZONE = "active_zone"
+    CAUTION_ZONE = "caution_zone"
+    STOPPED_OUT = "stopped_out"
+
+
+class CurrentInfoType:
+    """ Current Info Type """
+    # pylint: disable=too-few-public-methods
+    max_price: float
+    max_price_date: str
+    status: CurrentStatusType
+
+    def __init__(self, price = 0.0, date = ""):
+        self.max_price = price
+        self.max_price_date = date
+        self.status = CurrentStatusType.ACTIVE_ZONE
+
+
+class VFStopsResultType:
+    """ Volatility Factor / Stops Result Type (the main object returned) """
+    # pylint: disable=too-few-public-methods,invalid-name,too-many-instance-attributes
+    derived: VFStopLossRawResultType
+    alternate: VFStopLossRawResultType
+    vf: VFStopLossResultType
+    stop_loss: VFStopLossResultType
+    current_status: CurrentInfoType
     fund_name: str
-    data_sets: List[VQTimeSeriesType]
-    event_log: list
+    data_sets: List[VFTimeSeriesType]
+    event_log: List[StopLossEventLogType]
 
     def __init__(self):
         self.fund_name = ""
-        self.current_max = 0.0
-        self.alternate = VQStopLossRawResultType()
-        self.derived = VQStopLossRawResultType()
-        self.vq = VQStopLossResultType()
-        self.stop_loss = VQStopLossResultType()
+        self.current_status = CurrentInfoType()
+        self.alternate = VFStopLossRawResultType()
+        self.derived = VFStopLossRawResultType()
+        self.vf = VFStopLossResultType()
+        self.stop_loss = VFStopLossResultType()
         self.data_sets = []
         self.event_log = []
 
 
-class SmartMovingAvgType:
+class IntelligentMovingAvgType:
+    """ Intelligent Moving Average Type """
+    # pylint: disable=too-few-public-methods
     data_set: list
     short_slope: list
     long_slope: list
@@ -90,34 +145,25 @@ class SmartMovingAvgType:
         self.long_slope = []
 
 
-class StopLossEventType(Enum):
-    stop = 'stop'
-    minimum = 'minimum'
-    activate = 'activate'
-
-class StopLossEventLogType:
-    index: int
-    event: StopLossEventType
-    price: float
-
-    def __init__(self):
-        self.index = 0
-        self.event = StopLossEventType.stop
-        self.price = 0.0
-
-
 ################################################################
 
 class ConfigProperties:
+    """ Configuration Properties (high-level configuration settings) """
+    # pylint: disable=too-few-public-methods
     yf_properties = YFProperties()
-    vq_properties = VQProperties()
+    vf_properties = VFProperties()
 
-    def __init__(self, config: dict = {}):
+    def __init__(self, config: Union[dict, None] = None):
+        if not config:
+            config = {}
+
         self.yf_properties.interval = config.get("interval", self.yf_properties.interval)
         self.yf_properties.period = config.get("period", self.yf_properties.period)
         self.yf_properties.start_date = config.get("start_date")
         self.yf_properties.end_date = config.get("end_date")
-        self.yf_properties.include_bench = config.get("include_bench", self.yf_properties.include_bench)
+        self.yf_properties.include_bench = config.get(
+            "include_bench",
+            self.yf_properties.include_bench
+        )
 
-        self.vq_properties.std_level = config.get("vq_properties_level", self.vq_properties.std_level)
-        self.vq_properties.pricing = config.get("vq_properties_pricing", self.vq_properties.pricing)
+        self.vf_properties.pricing = config.get("vf_properties_pricing", self.vf_properties.pricing)

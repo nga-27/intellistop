@@ -1,39 +1,31 @@
-from pathlib import Path
-
+""" app.py """
 import numpy as np
 
 from intellistop import IntelliStop
-from test.utils import plot
-
-
-PLOT_DIR = Path("output").resolve().mkdir(exist_ok=True)
-PLOT_CONFIG = {
-    "save_path": "",
-    "save_plot": True,
-    "has_output": False,
-    "title": "",
-    "dual_axes": False,
-    "force_plot_second_y": False
-}
-
-def set_plot_config(file_name: str, title: str, view: bool = False,
-                    dual_axes: bool = False, force_plot_y: bool = False) -> dict:
-    new_config = PLOT_CONFIG.copy()
-    new_config["save_path"] = Path(f"output/{file_name}").resolve()
-    new_config["title"] = title
-    new_config["dual_axes"] = dual_axes
-    new_config["force_plot_second_y"] = force_plot_y
-    new_config["save_plot"] = True
-    new_config["has_output"] = view
-    return new_config
+from plot import plot
+from utils import startup
 
 
 def run_app():
+    """run_app
+
+    Primary application function that runs the standalone process
+    """
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    print("")
+    startup.logo_renderer()
+    startup.start_header()
     print("")
     fund = input("Enter a fund ticker symbol: ").upper()
     print("")
 
+    if len(fund) == 0:
+        print("ERROR: No fund ticker entered on input. Exiting...")
+        return
+
     stops = IntelliStop()
+    print(f"Starting 'Intellistop' with fund ticker '{fund}'...")
+
     vf_data = stops.run_analysis_for_ticker(fund)
     close = stops.return_data(fund)
     dates = stops.return_data(fund, key='__full__').get('Date', [])
@@ -69,13 +61,33 @@ def run_app():
 
     min_value = min(
         [
-            min([min(vf_obj.stop_loss_line) for vf_obj in vf_data.data_sets]),
+            min(min(vf_obj.stop_loss_line) for vf_obj in vf_data.data_sets),
             min(close)
         ]
     )
     range_value = max(close) - min_value
 
-    plot_config = set_plot_config(f"{fund}_RT_SL.png", f"{fund} - Real-Time Stop Loss ({np.round(vf_data.vq.curated, 3)})", view=True)
+    status_string = f"{fund} is currently in a green zone. BUY."
+    status_color = 'green'
+    if vf_data.current_status.status.value == 'stopped_out':
+        status_string = f"{fund} is currently STOPPED OUT. SELL / wait for a re-entry signal."
+        status_color = 'red'
+    elif vf_data.current_status.status.value == 'caution_zone':
+        status_string = f"{fund} is currently in a caution state. HOLD."
+        status_color = 'yellow'
+
+    shown_stop_loss = f"VF: {np.round(vf_data.vf.curated, 3)}\n"
+    if vf_data.current_status.status.value != 'stopped_out':
+        shown_stop_loss += f"Stop Loss: ${np.round(vf_data.stop_loss.curated, 2)}"
+    else:
+        shown_stop_loss += "Stop Loss: n/a"
+
+    plot_config = plot.set_plot_config(
+        f"{fund}_stop_losses.png",
+        f"{fund} - Stop Loss Analysis",
+        vf_stop_loss_text=shown_stop_loss,
+        view=True
+    )
     plot.app_plot(
         close,
         dates,
@@ -85,7 +97,9 @@ def run_app():
         yellow_zones,
         range_value,
         min_value,
-        config=plot_config
+        config=plot_config,
+        text_str=status_string,
+        str_color=status_color
     )
 
 

@@ -1,47 +1,104 @@
+""" volatility_factor.py
+
+Main "magic" of this tool. Ultimately, the VF is the key. If a price drops below the VF % of the
+current max, it is considered to be in a major downward trend, and it should be sold until it
+hits its re-entry signal.
+"""
 from typing import Tuple, List
-import math
 import numpy as np
 
-from .lib_types import StopLossEventLogType, StopLossEventType, VQTimeSeriesType
+from .lib_types import (
+    StopLossEventLogType, StopLossEventType, VFTimeSeriesType, VFStopLossResultType
+)
 
 
-def find_latest_max(data_set: list, last_values=100) -> float:
-    max_val = 0.0
-    for i in range(len(data_set)-1, len(data_set)-last_values, -1):
-        if data_set[i] > max_val:
-            max_val = data_set[i]
-    return max_val
+def get_stop_loss_from_value(max_price: float,
+                             volatility_factor: float,
+                             is_up_from: bool = False) -> float:
+    """get_stop_loss_from_value
+
+    Given a [recent] max price, return the stop_loss price given the volatility_factor of the
+    fund price.
+
+    Args:
+        max_price (float): current maximum price
+        volatility_factor (float): VF of the fund
+        is_up_from (bool, optional): when determining part of the re-entry signal, this is set to
+            True. When True, price must exceed this to start the re-entry signal process.
+            Defaults to False.
+
+    Returns:
+        float: price of the stop loss
+    """
+    if is_up_from:
+        return max_price * (1.0 + (volatility_factor / 100.0))
+    return max_price * (1.0 - (volatility_factor / 100.0))
 
 
-def get_stop_loss_from_list(price_list: list, vq: float) -> Tuple[float, float, int]:
-    current_max_value = 0.0
-    current_max_index = 0
-    current_stop_loss = 0.0
-    for i, price in enumerate(price_list):
-        if price > current_max_value:
-            current_max_value = price
-            current_max_index = i
-            current_stop_loss = price * (1.0 - (vq / 100.0))
+def get_caution_line_from_value(max_price: float, volatility_factor: float) -> float:
+    """get_caution_line_from_value
 
-    return current_stop_loss, current_max_value, current_max_index
+    Caution line is 60% of a drop from the "max_price" to the stop loss price
 
+    Args:
+        max_price (float): current maximum price
+        volatility_factor (float): VF of the fund
 
-def get_stop_loss_from_value(max_price: float, vf: float, isUpFrom: bool = False) -> float:
-    if isUpFrom:
-        return max_price * (1.0 + (vf / 100.0))
-    return max_price * (1.0 - (vf / 100.0))
+    Returns:
+        float: price of the caution line
+    """
+    return max_price * (1.0 - (0.6 * volatility_factor / 100.0))
 
 
-def get_caution_line_from_value(max_price: float, vf: float) -> float:
-    return max_price * (1.0 - (0.6 * vf / 100.0))
+def get_current_stop_loss_values(current_vfs: VFStopLossResultType,
+                                 current_max: float) -> VFStopLossResultType:
+    """get_current_stop_loss_values
+
+    Returns the VFStopLossResultType object, which has fields of aggressive (lowest stop loss
+    value), conservative (highest stop loss price), average of both, and curated, which is
+    essentially average but also caps the VF at 50.0 for extremely volatile stocks.
+
+    Args:
+        current_vfs (VFStopLossResultType): VF object with derived values
+        current_max (float): current maximum price
+
+    Returns:
+        VFStopLossResultType: aggressive, average, curated, conservative
+    """
+    current_sl = VFStopLossResultType()
+    current_sl.aggressive = get_stop_loss_from_value(current_max, current_vfs.aggressive)
+    current_sl.average = get_stop_loss_from_value(current_max, current_vfs.average)
+    current_sl.curated = get_stop_loss_from_value(current_max, current_vfs.curated)
+    current_sl.conservative = get_stop_loss_from_value(current_max, current_vfs.conservative)
+
+    if current_vfs.curated > 50.0:
+        current_sl.curated = get_stop_loss_from_value(current_max, 50.0)
+    return current_sl
 
 
 def generate_stop_loss_data_set(data: list,
-                                vf: float,
-                                smart_moving_average: list,
-                                smma_short_slope: list,
-                                smma_long_slope: list) -> Tuple[
-                                    List[VQTimeSeriesType], List[StopLossEventLogType]]:
+                                volatility_factor: float,
+                                intelligent_moving_average: list,
+                                ima_short_slope: list,
+                                ima_long_slope: list) -> Tuple[
+                                    List[VFTimeSeriesType], List[StopLossEventLogType]]:
+    """generate_stop_loss_data_set
+
+    The underlying logic function that creates the stop loss curves. This function also generates
+    the re-entry signals and restarts the new stop loss automatically.
+
+    Args:
+        data (list): [Close or Adjusted] price
+        volatility_factor (float): VF of the fund
+        intelligent_moving_average (list): data set of the intelligent moving average
+        ima_short_slope (list): the short slope of the intelligent moving average
+        ima_long_slope (list): the longer moving average of the slope of the intelligent moving
+            average
+
+    Returns:
+        Tuple[ List[VFTimeSeriesType], List[StopLossEventLogType]]
+    """
+    # pylint: disable=too-many-branches,too-many-statements
     stop_loss_objects = []
     stop_loss_logs = []
 
@@ -50,10 +107,11 @@ def generate_stop_loss_data_set(data: list,
     mode = 'active'
     reset_stop = [False, False, False, False, False]
 
-    sl_data = VQTimeSeriesType()
-    sl_data.caution_line.append(get_caution_line_from_value(data[0], vf))
+    sl_data = VFTimeSeriesType()
+    sl_data.caution_line.append(get_caution_line_from_value(data[0], volatility_factor))
     sl_data.max_price = data[0]
-    sl_data.stop_loss_line.append(get_stop_loss_from_value(data[0], vf))
+    sl_data.max_price_index = 0
+    sl_data.stop_loss_line.append(get_stop_loss_from_value(data[0], volatility_factor))
     sl_data.time_index_list.append(0)
 
     for i in range(1, len(data)):
@@ -62,9 +120,10 @@ def generate_stop_loss_data_set(data: list,
                 current_max[1] = data[i]
                 current_max[0] = i
                 sl_data.max_price = data[i]
-                sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], vf))
+                sl_data.max_price_index = i
+                sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], volatility_factor))
                 sl_data.time_index_list.append(i)
-                sl_data.caution_line.append(get_caution_line_from_value(data[i], vf))
+                sl_data.caution_line.append(get_caution_line_from_value(data[i], volatility_factor))
             else:
                 # We need to set anyway
                 sl_data.caution_line.append(sl_data.caution_line[-1])
@@ -89,33 +148,35 @@ def generate_stop_loss_data_set(data: list,
                 log = StopLossEventLogType()
                 log.index = i
                 log.price = np.round(data[i], 2)
-                log.event = StopLossEventType.minimum
+                log.event = StopLossEventType.MINIMUM
                 stop_loss_logs.append(log)
 
-            # Next, price has to rebound 1 VQ % (once)
-            if data[i] >= get_stop_loss_from_value(current_min[1], vf, isUpFrom=True) and not reset_stop[0]:
+            # Next, price has to rebound 1 VF % (once)
+            if data[i] >= get_stop_loss_from_value(
+                current_min[1], volatility_factor, is_up_from=True) \
+                and not reset_stop[0]:
                 reset_stop[0] = True
 
-            # Next, price has to be above the SmMA (on-going condition, thus the reset)
-            if reset_stop[0] and data[i] > smart_moving_average[i]:
+            # Next, price has to be above the IMA (on-going condition, thus the reset)
+            if reset_stop[0] and data[i] > intelligent_moving_average[i]:
                 reset_stop[1] = True
             else:
                 reset_stop[1] = False
 
-            # Next, short-time slope of SmMA must be > 0 (on-going)
-            if reset_stop[1] and smma_short_slope[i] > 0.0:
+            # Next, short-time slope of IMA must be > 0 (on-going)
+            if reset_stop[1] and ima_short_slope[i] > 0.0:
                 reset_stop[2] = True
             else:
                 reset_stop[2] = False
 
-            # Next, long-time slope of SmMA must be > 0 (on-going)
-            if reset_stop[2] and smma_long_slope[i] > 0.0:
+            # Next, long-time slope of IMA must be > 0 (on-going)
+            if reset_stop[2] and ima_long_slope[i] > 0.0:
                 reset_stop[3] = True
             else:
                 reset_stop[3] = True
 
             # Finally, short_slope > long_slope (on-going)
-            if reset_stop[3] and smma_short_slope[i] > smma_long_slope[i]:
+            if reset_stop[3] and ima_short_slope[i] > ima_long_slope[i]:
                 reset_stop[4] = True
 
             if all(reset_stop):
@@ -124,17 +185,18 @@ def generate_stop_loss_data_set(data: list,
                 reset_stop = [False for _ in reset_stop]
                 current_max[1] = data[i]
                 current_max[0] = i
-                
-                sl_data = VQTimeSeriesType()
-                sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], vf))
+
+                sl_data = VFTimeSeriesType()
+                sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], volatility_factor))
                 sl_data.max_price = data[i]
+                sl_data.max_price_index = i
                 sl_data.time_index_list.append(i)
-                sl_data.caution_line.append(get_caution_line_from_value(data[i], vf))
+                sl_data.caution_line.append(get_caution_line_from_value(data[i], volatility_factor))
 
                 log = StopLossEventLogType()
                 log.index = i
                 log.price = np.round(data[i], 2)
-                log.event = StopLossEventType.activate
+                log.event = StopLossEventType.ACTIVATE
                 stop_loss_logs.append(log)
 
     if mode == 'active':
