@@ -72,6 +72,6 @@ Using the "created" IMA, we'll look at a few conditions. Our targeted **BUY** si
 
 Now it's math time. How is the Volatility Factor (VF) calculated?
 
-$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
+[The Whitepaper](./static/volatility_factor.md)
 
 [math](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions)
