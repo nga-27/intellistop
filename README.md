@@ -4,6 +4,8 @@ Library tool to determine a smart stop-loss for technical analysis of funds. Thi
 
 <img alt="spy-stop-loss" src="static/spy_stop_loss.png" width=600/>
 
+<img alt="mrna-stop-loss" src="static/mrna_stop_loss.png" width=600/>
+
 ---
 
 # What is Intellistop?
@@ -48,6 +50,29 @@ pip install .[app]
 # For MacOS / or zsh
 pip install '.[app]'
 ```
+
+# Importing Class or Running the App
+
+This tool can be imported as a library class or run as a standalone app in the terminal.
+
+To run as a library import:
+
+```python
+from intellistop import Intellistop
+
+stops = IntelliStop()
+vf_data = stops.run_analysis_for_ticker(ticker_str)
+```
+
+To run as the standalone app, simply run in terminal:
+
+```sh
+python app.py
+```
+
+Then, enter the ticker symbol of the equity desired:
+
+<img alt="terminal_run_app" src="static/terminal_run_app.png" width=600/>
 
 # Entry Signal Triggers
 
