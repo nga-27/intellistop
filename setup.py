@@ -22,14 +22,14 @@ URL = 'https://github.mmm.com/nga-27/intellistop'
 EMAIL = 'namell91@gmail.com'
 AUTHOR = 'Nick Amell'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '1.0.0'
+VERSION = '1.0.2'
 
 # What packages are required for this module to be executed?
 REQUIRES = [
     "numpy==1.24.1",
     "pandas==1.5.2",
     "scipy==1.9.3",
-    "yfinance==0.2.3",
+    "yfinance==0.2.9",
 ]
 
 REQUIRES_APP = [
