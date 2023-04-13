@@ -60,7 +60,13 @@ $$
   \end{cases}
 $$
 
-Where $ c = 50$, so $ \sigma _{50}[k] $ and $ c = T_{10} $, so $ \sigma _{T_{10}}[k]$
+Where:
+
+$ c = 50$, so $ \sigma _{50}[k] $
+
+and
+
+$ c = T_{10} $, so $ \sigma _{T_{10}}[k]$
 
 We'll use both a period of 50 (50 day window for the standard deviation) and the $T_{10}$ period derived from step 4. Both standard deviation data sets will be used in step 6.
 
@@ -68,13 +74,19 @@ We'll use both a period of 50 (50 day window for the standard deviation) and the
 
 We'll separate the standard deviation data sets into "above" [the long moving average from step 1] and "below":
 
-* Above: $$A_c[k] = \sigma _c[k] \text{ if } f[k] > M_{200}[k] $$
-* Below: $$B_c[k] = \sigma _c[k] \text{ if } f[k] > M_{200}[k] $$
+* Above: 
+
+$$A_c[k] = \sigma _c[k] \text{ if } f[k] > M_{200}[k] $$
+
+* Below:
+
+$$B_c[k] = \sigma _c[k] \text{ if } f[k] > M_{200}[k] $$
 
 ... for both $c = 50$ and $c = T_{10}$. We'll calculate the average of the separated signals:
 
-*  $\bar{A}_c = A_{c_{mean}} = \frac{1}{N} \displaystyle\sum_{i=0}^{N-1}A_c[i]$
-*  $\bar{B}_c = B_{c_{mean}} = \frac{1}{N} \displaystyle\sum_{i=0}^{N-1}B_c[i]$
+$\bar{A}_c = A_{c_{mean}} = \frac{1}{N} \displaystyle\sum_{i=0}^{N-1}A_c[i]$
+
+$\bar{B}_c = B_{c_{mean}} = \frac{1}{N} \displaystyle\sum_{i=0}^{N-1}B_c[i]$
 
 ## Step 7: Volatility Factor and Stop Loss
 
