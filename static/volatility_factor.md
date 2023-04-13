@@ -62,11 +62,15 @@ $$
 
 Where:
 
-$ c = 50$, so $ \sigma _{50}[k] $
+$$
+c = 50$, so $ \sigma _{50}[k]
+$$
 
 and
 
-$ c = T_{10} $, so $ \sigma _{T_{10}}[k]$
+$$
+c = T_{10} $, so $ \sigma _{T_{10}}[k]
+$$
 
 We'll use both a period of 50 (50 day window for the standard deviation) and the $T_{10}$ period derived from step 4. Both standard deviation data sets will be used in step 6.
 
