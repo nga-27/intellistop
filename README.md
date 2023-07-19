@@ -6,6 +6,8 @@ Library tool to determine a smart stop-loss for technical analysis of funds. Thi
 
 <img alt="mrna-stop-loss" src="static/mrna_stop_loss.png" width=600/>
 
+<img alt="vgt-stop-loss" src="static/vgt_20230719.png" width=600>
+
 ---
 
 # What is Intellistop?
@@ -51,6 +53,8 @@ pip install .[app]
 pip install '.[app]'
 ```
 
+---
+
 # Importing Class or Running the App
 
 This tool can be imported as a library class or run as a standalone app in the terminal.
@@ -61,8 +65,29 @@ To run as a library import:
 from intellistop import Intellistop
 
 stops = IntelliStop()
-vf_data = stops.run_analysis_for_ticker(ticker_str)
+vf_data, has_error = stops.run_analysis_for_ticker(ticker_str)
 ```
+
+Note: as of `1.1.0`, `has_error` has been added as a tuple output of the main function. This is helpful for better handling of errors in one's application more gracefully.
+
+You may also use the following subfunctions for your benefit as well:
+
+```python
+from intellistop import Intellistop
+
+stops = IntelliStop()
+vf_data, has_error = stops.run_analysis_for_ticker(ticker_str)
+
+# Default is to only return 'Close' data
+close = stops.return_data(fund)
+
+# Optionally can pass in the exact key (see details of function)
+dates = stops.return_data(fund, key='__full__').get('Date', [])
+```
+
+Full documentation is available in the **[API Docs](./static/api.md)**.
+
+### Standalone App
 
 To run as the standalone app, simply run in terminal:
 
@@ -70,9 +95,11 @@ To run as the standalone app, simply run in terminal:
 python app.py
 ```
 
-Then, enter the ticker symbol of the equity desired:
+Then, enter the ticker symbol [or symbols separated by a space each] of the equity/equities desired:
 
 <img alt="terminal_run_app" src="static/terminal_run_app.png" width=600/>
+
+---
 
 # Entry Signal Triggers
 

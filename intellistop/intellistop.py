@@ -99,7 +99,14 @@ class IntelliStop:
     def return_data(self, fund="", key: Union[str, None] = None) -> Union[dict, list]:
         """return_data
 
-        Returns the full ticker data as a dict or a list, if supplied the ticker data object key
+        Returns the full ticker data as a dict or a list, if supplied the ticker data object key.
+
+        | Fund | key | Returned Data |
+        ------------------------------
+        | "" | x | All data (list of all funds data) |
+        | Y | None | Fund data of 'Close' |
+        | Y | [Close, Open, High, Low] | Fund data of supplied key |
+        | Y | '__full__' | all of single fund data |
 
         Args:
             fund (str, optional): ticker string. Defaults to "".
@@ -285,7 +292,7 @@ class IntelliStop:
     # ACTUAL FUNCTION
     ##########################################################################################
 
-    def run_analysis_for_ticker(self, fund: str) -> VFStopsResultType:
+    def run_analysis_for_ticker(self, fund: str) -> Tuple[VFStopsResultType, bool]:
         """run_analysis_for_ticker
 
         High-level function that runs all Intellistop functionality, a single function to run
@@ -304,10 +311,17 @@ class IntelliStop:
                     fund_name: str
                     data_sets: List[VFTimeSeriesType]
                     event_log: list
+
+            boolean: has_error (True if error in calculation)
         """
+        # We need to remember to reset on looping
+        self.has_errors = False
         self.fetch_extended_time_series(fund)
+        if self.has_errors:
+            return self.stops, True
+
         self.calculate_vf_stops_data()
         self.generate_intelligent_moving_average()
         self.analyze_data_set()
 
-        return self.stops
+        return self.stops, False
