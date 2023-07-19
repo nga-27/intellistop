@@ -285,7 +285,7 @@ class IntelliStop:
     # ACTUAL FUNCTION
     ##########################################################################################
 
-    def run_analysis_for_ticker(self, fund: str) -> VFStopsResultType:
+    def run_analysis_for_ticker(self, fund: str) -> Tuple[VFStopsResultType, bool]:
         """run_analysis_for_ticker
 
         High-level function that runs all Intellistop functionality, a single function to run
@@ -304,10 +304,17 @@ class IntelliStop:
                     fund_name: str
                     data_sets: List[VFTimeSeriesType]
                     event_log: list
+
+            boolean: has_error (True if error in calculation)
         """
+        # We need to remember to reset on looping
+        self.has_errors = False
         self.fetch_extended_time_series(fund)
+        if self.has_errors:
+            return self.stops, True
+
         self.calculate_vf_stops_data()
         self.generate_intelligent_moving_average()
         self.analyze_data_set()
 
-        return self.stops
+        return self.stops, False

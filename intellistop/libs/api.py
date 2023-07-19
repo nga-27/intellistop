@@ -27,7 +27,7 @@ def download_data(fund: str, config: ConfigProperties) -> dict:
 
     if config.yf_properties.include_bench:
         fund += " ^GSPC"
-
+    
     if start_date and end_date:
         data = yf.download(
             tickers=fund,
@@ -40,6 +40,7 @@ def download_data(fund: str, config: ConfigProperties) -> dict:
         data = yf.download(tickers=fund, start=start_date, interval=interval, group_by='ticker')
     else:
         data = yf.download(tickers=fund, period=period, interval=interval, group_by='ticker')
+
     formatted_data = format_data(data, fund)
     return formatted_data
 

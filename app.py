@@ -30,7 +30,12 @@ def run_app():
     print(f"Starting 'Intellistop' with fund ticker(s): '{fund_raw}'...")
 
     for fund in fund_list:
-        vf_data = stops.run_analysis_for_ticker(fund)
+        vf_data, has_error = stops.run_analysis_for_ticker(fund)
+        if has_error:
+            print(f"\r\nFund ticker '{fund}' failed to generate Intellistops data.")
+            _ = input("Press any key to continue...")
+            continue
+
         close = stops.return_data(fund)
         dates = stops.return_data(fund, key='__full__').get('Date', [])
 
