@@ -99,7 +99,14 @@ class IntelliStop:
     def return_data(self, fund="", key: Union[str, None] = None) -> Union[dict, list]:
         """return_data
 
-        Returns the full ticker data as a dict or a list, if supplied the ticker data object key
+        Returns the full ticker data as a dict or a list, if supplied the ticker data object key.
+
+        | Fund | key | Returned Data |
+        ------------------------------
+        | "" | x | All data (list of all funds data) |
+        | Y | None | Fund data of 'Close' |
+        | Y | [Close, Open, High, Low] | Fund data of supplied key |
+        | Y | '__full__' | all of single fund data |
 
         Args:
             fund (str, optional): ticker string. Defaults to "".
