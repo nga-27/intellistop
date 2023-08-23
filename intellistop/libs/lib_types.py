@@ -145,6 +145,17 @@ class IntelligentMovingAvgType:
         self.long_slope = []
 
 
+class NewTickerDataStorageType:
+    current_stop: float
+    current_vf: float
+    current_max_price: float
+
+    def __init__(self, vf: float, stop: float, max_close: float):
+        self.current_stop = stop
+        self.current_vf = vf
+        self.current_max_price = max_close
+
+
 ################################################################
 
 class ConfigProperties:

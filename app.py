@@ -26,7 +26,7 @@ def run_app():
     fund_stripped = fund_raw.strip()
     fund_list = fund_stripped.split(' ')
 
-    stops = IntelliStop()
+    stops = IntelliStop(use_memory=True)
     print(f"Starting 'Intellistop' with fund ticker(s): '{fund_raw}'...")
 
     for fund in fund_list:

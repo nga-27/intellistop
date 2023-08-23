@@ -7,7 +7,7 @@ from .libs import (
     download_data, ConfigProperties, VFStopsResultType, get_fourier_spectrum,
     calculate_time_series_variances, simple_moving_average_filter, intelligent_moving_average,
     IntelligentMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set, VFTimeSeriesType,
-    CurrentStatusType, get_current_stop_loss_values
+    CurrentStatusType, get_current_stop_loss_values, Storage, NewTickerDataStorageType
 )
 
 class IntelliStop:
@@ -20,8 +20,13 @@ class IntelliStop:
     stops = VFStopsResultType()
     intelligent_moving_avg = IntelligentMovingAvgType()
     has_errors = False
+    use_memory = False
+    storage_provider: Union[Storage, None] = None
 
-    def __init__(self, config: Union[dict, None] = None):
+    def __init__(self, config: Union[dict, None] = None, use_memory: Union[dict, None] = None):
+        if use_memory:
+            self.use_memory = True
+            self.storage_provider = Storage()
         if not config:
             config = {}
         self.config = ConfigProperties(config)
@@ -323,5 +328,13 @@ class IntelliStop:
         self.calculate_vf_stops_data()
         self.generate_intelligent_moving_average()
         self.analyze_data_set()
+
+        if self.use_memory:
+            data = NewTickerDataStorageType(
+                self.stops.vf.curated,
+                self.stops.stop_loss.curated,
+                self.stops.data_sets[-1].max_price)
+            self.storage_provider.update_ticker(self.stops.fund_name, data)
+            self.storage_provider.store()
 
         return self.stops, False

@@ -3,7 +3,7 @@ from .api import download_data
 from .constants import YF_DATA_CONFIG_DEFAULTS
 from .lib_types import (
     ConfigProperties, VFStopsResultType, IntelligentMovingAvgType, VFTimeSeriesType,
-    CurrentStatusType
+    CurrentStatusType, NewTickerDataStorageType
 )
 from .variances import calculate_time_series_variances
 from .volatility_factor import (
@@ -14,3 +14,4 @@ from .filters import (
 )
 from .fourier import get_fourier_spectrum
 from .extrema import get_extrema
+from .storage import Storage
