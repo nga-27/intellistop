@@ -396,11 +396,12 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
     if len(plot_config.vf_sl_box_str) > 0:
         props = dict(boxstyle='round', facecolor='white', alpha=0.25)
         ax_handle.text(
-            0.02,
-            0.90,
+            0.01,
+            1.02,
             plot_config.vf_sl_box_str,
             transform=ax_handle.transAxes,
-            bbox=props
+            bbox=props,
+            fontsize=8
         )
 
     if plot_config.save_plot:

@@ -272,6 +272,8 @@ class IntelliStop:
             if historical_data:
                 min_vf = min(volatility_factor, historical_data[StorageKeysEnum.min_vf.value])
 
+        self.stops.vf.historical_cons = min_vf
+
         self.stops.data_sets, self.stops.event_log = generate_stop_loss_data_set(
             data,
             volatility_factor,

@@ -112,7 +112,9 @@ def run_app():
 
         shown_stop_loss = f"VF: {np.round(vf_data.vf.curated, 3)}\n"
         if vf_data.current_status.status.value != 'stopped_out':
-            shown_stop_loss += f"Stop Loss: ${np.round(vf_data.stop_loss.curated, 2)}"
+            shown_stop_loss += f"Stop Loss: ${np.round(vf_data.stop_loss.curated, 2)}\n"
+            shown_stop_loss += f"Cons VF: {np.round(vf_data.vf.historical_cons, 3)}\n"
+            shown_stop_loss += f"Cons SL: ${np.round(vf_data.stop_loss.historical_cons, 2)}"
         else:
             shown_stop_loss += "Stop Loss: n/a"
 

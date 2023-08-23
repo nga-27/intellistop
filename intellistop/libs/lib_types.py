@@ -37,12 +37,14 @@ class VFStopLossResultType:
     average: float
     conservative: float
     curated: float
+    historical_cons: float
 
     def __init__(self):
         self.aggressive = 0.0
         self.average = 0.0
         self.conservative = 0.0
         self.curated = 0.0
+        self.historical_cons = 0.0
 
 class VFStopLossRawResultType:
     """ Volatility Factor / Stop Loss Raw Result Type"""
