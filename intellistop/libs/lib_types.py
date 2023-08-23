@@ -61,6 +61,7 @@ class VFTimeSeriesType:
     max_price_index: int
     caution_line: List[float]
     stop_loss_line: List[float]
+    conservative_line: List[float]
     time_index_list: List[int]
 
     def __init__(self):
@@ -68,6 +69,7 @@ class VFTimeSeriesType:
         self.max_price_index = 0
         self.caution_line = []
         self.stop_loss_line = []
+        self.conservative_line = []
         self.time_index_list = []
 
 class StopLossEventType(Enum):
@@ -93,6 +95,7 @@ class CurrentStatusType(Enum):
     """ Current Status Type Enumeration """
     ACTIVE_ZONE = "active_zone"
     CAUTION_ZONE = "caution_zone"
+    CONSERVATIVE_OUT = "conservative_out"
     STOPPED_OUT = "stopped_out"
 
 

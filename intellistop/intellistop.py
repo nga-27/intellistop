@@ -7,7 +7,8 @@ from .libs import (
     download_data, ConfigProperties, VFStopsResultType, get_fourier_spectrum,
     calculate_time_series_variances, simple_moving_average_filter, intelligent_moving_average,
     IntelligentMovingAvgType, get_slope_of_data_set, generate_stop_loss_data_set, VFTimeSeriesType,
-    CurrentStatusType, get_current_stop_loss_values, Storage, NewTickerDataStorageType
+    CurrentStatusType, get_current_stop_loss_values, Storage, NewTickerDataStorageType,
+    StorageKeysEnum
 )
 
 class IntelliStop:
@@ -265,12 +266,19 @@ class IntelliStop:
         data = self.data[self.fund_name][self.config.vf_properties.pricing]
         volatility_factor = self.stops.vf.curated
 
+        min_vf = volatility_factor
+        if self.use_memory:
+            historical_data = self.storage_provider.get_stored_data_by_ticker(self.fund_name)
+            if historical_data:
+                min_vf = min(volatility_factor, historical_data[StorageKeysEnum.min_vf.value])
+
         self.stops.data_sets, self.stops.event_log = generate_stop_loss_data_set(
             data,
             volatility_factor,
             self.intelligent_moving_avg.data_set,
             self.intelligent_moving_avg.short_slope,
-            self.intelligent_moving_avg.long_slope
+            self.intelligent_moving_avg.long_slope,
+            min_vf
         )
 
         self.stops.current_status.max_price = np.round(self.stops.data_sets[-1].max_price, 2)

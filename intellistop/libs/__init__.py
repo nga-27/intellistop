@@ -14,4 +14,4 @@ from .filters import (
 )
 from .fourier import get_fourier_spectrum
 from .extrema import get_extrema
-from .storage import Storage
+from .storage import Storage, StorageKeysEnum

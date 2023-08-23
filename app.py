@@ -1,7 +1,7 @@
 """ app.py """
 import numpy as np
 
-from intellistop import IntelliStop
+from intellistop import IntelliStop, CurrentStatusType
 from plot import plot
 from utils import startup
 
@@ -47,6 +47,9 @@ def run_app():
         red_one = []
         for i in range(len(close)):
             if i not in temp_concat:
+                if len(red_one) == 0 and i != 0:
+                    # First one that crosses is still in temp_concat, so we need to go backwards
+                    red_one.append(i-1)
                 red_one.append(i)
             else:
                 if len(red_one) > 0:
@@ -56,17 +59,36 @@ def run_app():
             red_zones.append(red_one)
 
         yellow_zones = []
-        for vf_obj in vf_data.data_sets:
+        orange_zones = []
+        for _, vf_obj in enumerate(vf_data.data_sets):
             yellow_one = []
+            orange_one = []
             for i, ind in enumerate(vf_obj.time_index_list):
-                if close[ind] < vf_obj.caution_line[i]:
-                    yellow_one.append(ind)
-                else:
+                if close[ind] < vf_obj.conservative_line[i]:
+                    orange_one.append(ind)
                     if len(yellow_one) > 0:
+                        yellow_one.append(ind)
                         yellow_zones.append(yellow_one)
                         yellow_one = []
-        if len(yellow_one) > 0:
-            yellow_zones.append(yellow_one)
+                elif close[ind] < vf_obj.caution_line[i]:
+                    yellow_one.append(ind)
+                    if len(orange_one) > 0:
+                        orange_one.append(ind)
+                        orange_zones.append(orange_one)
+                        orange_one = []
+                else:
+                    if len(yellow_one) > 0:
+                        yellow_one.append(ind)
+                        yellow_zones.append(yellow_one)
+                        yellow_one = []
+                    if len(orange_one) > 0:
+                        orange_one.append(ind)
+                        orange_zones.append(orange_one)
+                        orange_one = []
+            if len(yellow_one) > 0:
+                yellow_zones.append(yellow_one)
+            if len(orange_one) > 0:
+                orange_zones.append(orange_one)
 
         min_value = min(
             [
@@ -78,12 +100,15 @@ def run_app():
 
         status_string = f"{fund} is currently in a green zone. BUY."
         status_color = 'green'
-        if vf_data.current_status.status.value == 'stopped_out':
+        if vf_data.current_status.status.value == CurrentStatusType.STOPPED_OUT:
             status_string = f"{fund} is currently STOPPED OUT. SELL / wait for a re-entry signal."
             status_color = 'red'
-        elif vf_data.current_status.status.value == 'caution_zone':
+        elif vf_data.current_status.status.value == CurrentStatusType.CAUTION_ZONE:
             status_string = f"{fund} is currently in a caution state. HOLD."
             status_color = 'yellow'
+        elif vf_data.current_status.status.value == CurrentStatusType.CONSERVATIVE_OUT:
+            status_string = f"{fund} has STOPPED OUT on the conservative factor. SELL / wait for a re-entry signal."
+            status_color = 'orange'
 
         shown_stop_loss = f"VF: {np.round(vf_data.vf.curated, 3)}\n"
         if vf_data.current_status.status.value != 'stopped_out':
@@ -108,7 +133,8 @@ def run_app():
             min_value,
             config=plot_config,
             text_str=status_string,
-            str_color=status_color
+            str_color=status_color,
+            orange_zone_x_values=orange_zones
         )
 
 

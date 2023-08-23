@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+from typing import Union
 from enum import Enum
 
 from .lib_types import NewTickerDataStorageType
@@ -74,4 +75,7 @@ class Storage:
         
         self.stored_data[StorageKeysTopEnum.tickers.value][ticker]\
             [StorageKeysEnum.update_date.value] = datetime.datetime.now().isoformat()
+        
+    def get_stored_data_by_ticker(self, ticker: str) -> Union[dict, None]:
+        return self.stored_data[StorageKeysTopEnum.tickers.value].get(ticker)
         

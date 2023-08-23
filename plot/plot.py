@@ -272,7 +272,8 @@ def plot_with_circles(dataset: list,
 def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType],
              green_zone_x_values: List[list], red_zone_x_values: List[list],
              yellow_zone_x_values: List[list], y_range: float, minimum: float,
-             config: Union[dict, None] = None, text_str: str = "", str_color: str = ""):
+             config: Union[dict, None] = None, text_str: str = "", str_color: str = "",
+             orange_zone_x_values: Union[List[list], None] = None):
     """app_plot
 
     Primary plotting function that generates the standalone app's visual output. The default is
@@ -292,10 +293,14 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
         config (dict, optional): plot config options. Defaults to {}.
         text_str (str, optional): text box for notes displayed
         str_color (str, optional): color for notes displayed
+        orange_zone_x_values (List[list], optional): list of lists of the orange / conservative zones
     """
     # pylint: disable=too-many-locals
     if not config:
         config = {}
+    if not orange_zone_x_values:
+        orange_zone_x_values = []
+
     plot_config = PlotConfig(config)
     fig, ax_handle = plt.subplots()
 
@@ -304,10 +309,12 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
 
     y_start = minimum - (y_range * 0.05)
     height = y_range * 0.02
+    max_index = len(dates)
 
     for stop in stop_loss_objects:
         sub_dates = [date_indexes[index] for index in stop.time_index_list]
         ax_handle.plot(sub_dates, stop.caution_line, color='gold')
+        ax_handle.plot(sub_dates, stop.conservative_line, color='orange')
         ax_handle.plot(sub_dates, stop.stop_loss_line, color='red')
 
     for green_zone in green_zone_x_values:
@@ -336,6 +343,21 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
                 height,
                 edgecolor='red',
                 facecolor='red',
+                fill=True
+            )
+        )
+
+    for orange_zone in orange_zone_x_values:
+        start = mdates.date2num(date_indexes[orange_zone[0]])
+        end = mdates.date2num(date_indexes[orange_zone[-1]])
+        width = end - start
+        ax_handle.add_patch(
+            Rectangle(
+                (start, y_start),
+                width,
+                height,
+                edgecolor='orange',
+                facecolor='orange',
                 fill=True
             )
         )
