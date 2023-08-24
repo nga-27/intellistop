@@ -68,19 +68,21 @@ def get_current_stop_loss_values(current_vfs: VFStopLossResultType,
     current_sl = VFStopLossResultType()
     current_sl.aggressive = get_stop_loss_from_value(current_max, current_vfs.aggressive)
     current_sl.average = get_stop_loss_from_value(current_max, current_vfs.average)
-    current_sl.curated = get_stop_loss_from_value(current_max, current_vfs.curated)
+    current_sl.curated = get_stop_loss_from_value(current_max, min(current_vfs.curated, 50.0))
     current_sl.conservative = get_stop_loss_from_value(current_max, current_vfs.conservative)
+    current_sl.historical_cons = get_stop_loss_from_value(
+        current_max, min(current_vfs.historical_cons, 50.0))
 
-    if current_vfs.curated > 50.0:
-        current_sl.curated = get_stop_loss_from_value(current_max, 50.0)
     return current_sl
 
 
+# pylint: disable=too-many-arguments
 def generate_stop_loss_data_set(data: list,
                                 volatility_factor: float,
                                 intelligent_moving_average: list,
                                 ima_short_slope: list,
-                                ima_long_slope: list) -> Tuple[
+                                ima_long_slope: list,
+                                min_vf: float) -> Tuple[
                                     List[VFTimeSeriesType], List[StopLossEventLogType]]:
     """generate_stop_loss_data_set
 
@@ -112,6 +114,7 @@ def generate_stop_loss_data_set(data: list,
     sl_data.max_price = data[0]
     sl_data.max_price_index = 0
     sl_data.stop_loss_line.append(get_stop_loss_from_value(data[0], volatility_factor))
+    sl_data.conservative_line.append(get_stop_loss_from_value(data[0], min_vf))
     sl_data.time_index_list.append(0)
 
     for i in range(1, len(data)):
@@ -124,10 +127,12 @@ def generate_stop_loss_data_set(data: list,
                 sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], volatility_factor))
                 sl_data.time_index_list.append(i)
                 sl_data.caution_line.append(get_caution_line_from_value(data[i], volatility_factor))
+                sl_data.conservative_line.append(get_stop_loss_from_value(data[i], min_vf))
             else:
                 # We need to set anyway
                 sl_data.caution_line.append(sl_data.caution_line[-1])
                 sl_data.stop_loss_line.append(sl_data.stop_loss_line[-1])
+                sl_data.conservative_line.append(sl_data.conservative_line[-1])
                 sl_data.time_index_list.append(i)
 
         if mode == 'active' and data[i] < sl_data.stop_loss_line[-1]:
@@ -188,6 +193,7 @@ def generate_stop_loss_data_set(data: list,
 
                 sl_data = VFTimeSeriesType()
                 sl_data.stop_loss_line.append(get_stop_loss_from_value(data[i], volatility_factor))
+                sl_data.conservative_line.append(get_stop_loss_from_value(data[i], min_vf))
                 sl_data.max_price = data[i]
                 sl_data.max_price_index = i
                 sl_data.time_index_list.append(i)

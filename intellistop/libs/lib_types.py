@@ -37,12 +37,14 @@ class VFStopLossResultType:
     average: float
     conservative: float
     curated: float
+    historical_cons: float
 
     def __init__(self):
         self.aggressive = 0.0
         self.average = 0.0
         self.conservative = 0.0
         self.curated = 0.0
+        self.historical_cons = 0.0
 
 class VFStopLossRawResultType:
     """ Volatility Factor / Stop Loss Raw Result Type"""
@@ -61,6 +63,7 @@ class VFTimeSeriesType:
     max_price_index: int
     caution_line: List[float]
     stop_loss_line: List[float]
+    conservative_line: List[float]
     time_index_list: List[int]
 
     def __init__(self):
@@ -68,6 +71,7 @@ class VFTimeSeriesType:
         self.max_price_index = 0
         self.caution_line = []
         self.stop_loss_line = []
+        self.conservative_line = []
         self.time_index_list = []
 
 class StopLossEventType(Enum):
@@ -93,6 +97,7 @@ class CurrentStatusType(Enum):
     """ Current Status Type Enumeration """
     ACTIVE_ZONE = "active_zone"
     CAUTION_ZONE = "caution_zone"
+    CONSERVATIVE_OUT = "conservative_out"
     STOPPED_OUT = "stopped_out"
 
 
@@ -143,6 +148,19 @@ class IntelligentMovingAvgType:
         self.data_set = []
         self.short_slope = []
         self.long_slope = []
+
+
+class NewTickerDataStorageType:
+    """ New Ticker Data Storage for Storage Class """
+    # pylint: disable=too-few-public-methods
+    current_stop: float
+    current_vf: float
+    current_max_price: float
+
+    def __init__(self, current_vf: float, stop: float, max_close: float):
+        self.current_stop = stop
+        self.current_vf = current_vf
+        self.current_max_price = max_close
 
 
 ################################################################

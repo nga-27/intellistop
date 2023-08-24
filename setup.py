@@ -22,7 +22,7 @@ URL = 'https://github.mmm.com/nga-27/intellistop'
 EMAIL = 'namell91@gmail.com'
 AUTHOR = 'Nick Amell'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '1.1.0'
+VERSION = '1.2.0'
 
 # What packages are required for this module to be executed?
 REQUIRES = [

@@ -85,7 +85,30 @@ close = stops.return_data(fund)
 dates = stops.return_data(fund, key='__full__').get('Date', [])
 ```
 
-Full documentation is available in the **[API Docs](./static/api.md)**.
+Full documentation of features of `IntelliStop` is available in the **[API Docs](./static/api.md)**.
+
+---
+
+### `use_memory` Input Argument for "Conservative" Stops
+
+Optionally, as of version `1.2.0`, you can pass a boolean to the optional field of `use_memory` to `stops = IntelliStop()`. This is shown below:
+
+```python
+from intellistop import Intellistop
+
+stops = IntelliStop(use_memory=True)
+vf_data, has_error = stops.run_analysis_for_ticker(ticker_str)
+
+# Default is to only return 'Close' data
+close = stops.return_data(fund)
+
+# Optionally can pass in the exact key (see details of function)
+dates = stops.return_data(fund, key='__full__').get('Date', [])
+```
+
+[Full details on historical data creating a more conservative VF and stop loss.](./static/historical_vf.md)
+
+---
 
 ### Standalone App
 
