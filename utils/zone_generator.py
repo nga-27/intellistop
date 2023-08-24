@@ -1,3 +1,4 @@
+""" Green/yellow/orange/red zone generating functions """
 from typing import List, Tuple
 
 from intellistop import VFStopsResultType

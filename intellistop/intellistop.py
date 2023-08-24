@@ -270,7 +270,7 @@ class IntelliStop:
         if self.use_memory:
             historical_data = self.storage_provider.get_stored_data_by_ticker(self.fund_name)
             if historical_data:
-                min_vf = min(volatility_factor, historical_data[StorageKeysEnum.min_vf.value])
+                min_vf = min(volatility_factor, historical_data[StorageKeysEnum.MIN_VF.value])
 
         self.stops.vf.historical_cons = min_vf
 

@@ -151,13 +151,15 @@ class IntelligentMovingAvgType:
 
 
 class NewTickerDataStorageType:
+    """ New Ticker Data Storage for Storage Class """
+    # pylint: disable=too-few-public-methods
     current_stop: float
     current_vf: float
     current_max_price: float
 
-    def __init__(self, vf: float, stop: float, max_close: float):
+    def __init__(self, current_vf: float, stop: float, max_close: float):
         self.current_stop = stop
-        self.current_vf = vf
+        self.current_vf = current_vf
         self.current_max_price = max_close
 
 

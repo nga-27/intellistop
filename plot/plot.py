@@ -49,6 +49,7 @@ class PlotConfig:
         self.vf_sl_box_str = config.get('vf_sl_box_str', "")
 
 
+# pylint: disable=too-many-arguments
 def set_plot_config(file_name: str,
                     title: str,
                     view: bool = False,
@@ -293,7 +294,8 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
         config (dict, optional): plot config options. Defaults to {}.
         text_str (str, optional): text box for notes displayed
         str_color (str, optional): color for notes displayed
-        orange_zone_x_values (List[list], optional): list of lists of the orange / conservative zones
+        orange_zone_x_values (List[list], optional):
+            list of lists of the orange / conservative zones
     """
     # pylint: disable=too-many-locals
     if not config:
@@ -309,7 +311,6 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
 
     y_start = minimum - (y_range * 0.05)
     height = y_range * 0.02
-    max_index = len(dates)
 
     for stop in stop_loss_objects:
         sub_dates = [date_indexes[index] for index in stop.time_index_list]

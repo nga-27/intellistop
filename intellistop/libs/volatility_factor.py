@@ -76,6 +76,7 @@ def get_current_stop_loss_values(current_vfs: VFStopLossResultType,
     return current_sl
 
 
+# pylint: disable=too-many-arguments
 def generate_stop_loss_data_set(data: list,
                                 volatility_factor: float,
                                 intelligent_moving_average: list,

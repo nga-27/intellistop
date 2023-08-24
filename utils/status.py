@@ -1,3 +1,4 @@
+""" UI-based status functions """
 from typing import Tuple
 import numpy as np
 from intellistop import VFStopsResultType, CurrentStatusType
@@ -24,7 +25,8 @@ def get_vf_status(fund_name: str, vf_data: VFStopsResultType) -> Tuple[str, str,
         status_string = f"{fund_name} is currently in a CAUTION state. HOLD."
         status_color = 'yellow'
     elif vf_data.current_status.status.value == CurrentStatusType.CONSERVATIVE_OUT.value:
-        status_string = f"{fund_name} has STOPPED OUT on the conservative factor. SELL / wait for a re-entry signal."
+        status_string = f"{fund_name} has STOPPED OUT on the conservative factor. " + \
+            "SELL / wait for a re-entry signal."
         status_color = 'orange'
 
     shown_stop_loss = f"VF: {np.round(vf_data.vf.curated, 3)}\n"

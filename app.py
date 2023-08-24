@@ -1,7 +1,6 @@
 """ app.py """
-import numpy as np
-
 from intellistop import IntelliStop
+
 from plot import plot
 from utils import startup, zone_generator, status
 
@@ -11,19 +10,10 @@ def run_app():
 
     Primary application function that runs the standalone process
     """
-    print("")
-    startup.logo_renderer()
-    startup.start_header()
-    print("")
-    fund_raw = input("Enter a fund ticker [or tickers separated by a space]: ").upper()
-    print("")
-
-    if len(fund_raw) == 0:
-        print("ERROR: No fund ticker entered on input. Exiting...")
+    # pylint: disable=too-many-locals
+    fund_list, fund_raw, has_error = startup.handle_startup()
+    if has_error:
         return
-    
-    fund_stripped = fund_raw.strip()
-    fund_list = fund_stripped.split(' ')
 
     # Can either pass nothing or pass True/False to use_memory for more conservative stops
     stops = IntelliStop(use_memory=True)
@@ -42,7 +32,6 @@ def run_app():
 
         green_zones = [vf_obj.time_index_list for vf_obj in vf_data.data_sets]
         red_zones = zone_generator.generate_red_zones(green_zones, close)
-
         yellow_zones, orange_zones = zone_generator.generate_yellow_orange_zones(vf_data, close)
 
         status_string, status_color, shown_stop_loss = status.get_vf_status(fund, vf_data)

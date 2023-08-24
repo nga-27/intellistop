@@ -4,6 +4,7 @@ Functions for app prints on running script
 """
 from pathlib import Path
 import time
+from typing import Tuple
 
 
 MAIN = "\033[1;35m"
@@ -66,3 +67,27 @@ def logo_renderer():
 
         print("\r\n\r\n")
         time.sleep(1)
+
+
+def handle_startup() -> Tuple[list, str, bool]:
+    """handle_startup
+
+    returns the fund list content
+
+    Returns:
+        Tuple[list, str, bool]: fund string list, raw input string, has_error
+    """
+    print("")
+    logo_renderer()
+    start_header()
+    print("")
+    fund_raw = input("Enter a fund ticker [or tickers separated by a space]: ").upper()
+    print("")
+
+    if len(fund_raw) == 0:
+        print("ERROR: No fund ticker entered on input. Exiting...")
+        return [], "", True
+
+    fund_stripped = fund_raw.strip()
+    fund_list = fund_stripped.split(' ')
+    return fund_list, fund_raw, False
