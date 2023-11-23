@@ -12,6 +12,9 @@ from .lib_types import (
 )
 
 
+ERROR_ZONE_THRESHOLD_MAX = 0.02
+
+
 def get_stop_loss_from_value(max_price: float,
                              volatility_factor: float,
                              is_up_from: bool = False) -> float:
@@ -117,6 +120,7 @@ def generate_stop_loss_data_set(data: list,
     sl_data.conservative_line.append(get_stop_loss_from_value(data[0], min_vf))
     sl_data.time_index_list.append(0)
 
+    num_times_below_sl = 0
     for i in range(1, len(data)):
         if mode == 'active':
             if data[i] > current_max[1]:
@@ -135,15 +139,31 @@ def generate_stop_loss_data_set(data: list,
                 sl_data.conservative_line.append(sl_data.conservative_line[-1])
                 sl_data.time_index_list.append(i)
 
+            if data[i] >= sl_data.stop_loss_line[-1]:
+                num_times_below_sl = 0
+
         if mode == 'active' and data[i] < sl_data.stop_loss_line[-1]:
-            # Officially a STOPPED OUT condition
-            mode = 'stopped'
-            current_max[1] = 0.0
-            log = StopLossEventLogType()
-            log.index = i
-            log.price = np.round(data[i], 2)
-            stop_loss_logs.append(log)
-            stop_loss_objects.append(sl_data)
+            # Officially a STOPPED OUT condition (if 2nd consecutive time with adjusted stop loss)
+            # This prevents sideways motion or bottoming before major rebounds to be missed
+            # completely by a single bad day.
+            num_times_below_sl += 1
+            if num_times_below_sl > 0:
+                # We'll check to see if it rebounded within our SL "measurement error zone"
+                error_zone = ERROR_ZONE_THRESHOLD_MAX * (min_vf / 50.0)
+                adj_error_zone_stop_loss = sl_data.stop_loss_line[-1] * (1.0 - error_zone)
+                if data[i] >= adj_error_zone_stop_loss:
+                    # Fund popped up within the error zone, so we'll ignore it for now
+                    num_times_below_sl -= 1
+
+            if num_times_below_sl > 1:
+                num_times_below_sl = 0
+                mode = 'stopped'
+                current_max[1] = 0.0
+                log = StopLossEventLogType()
+                log.index = i
+                log.price = np.round(data[i], 2)
+                stop_loss_logs.append(log)
+                stop_loss_objects.append(sl_data)
 
         if mode == 'stopped':
             # First, track minimum...
