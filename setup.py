@@ -18,7 +18,7 @@ from setuptools import find_packages, setup
 # Package meta-data.
 NAME = 'intellistop'
 DESCRIPTION = 'Library to determine a intelligent stop-loss for technical analysis of funds.'
-URL = 'https://github.mmm.com/nga-27/intellistop'
+URL = 'https://github.com/nga-27/intellistop'
 EMAIL = 'namell91@gmail.com'
 AUTHOR = 'Nick Amell'
 REQUIRES_PYTHON = '>=3.8.0'
