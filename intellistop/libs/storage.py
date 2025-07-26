@@ -19,6 +19,7 @@ class StorageKeysTopEnum(Enum):
     VERSION = "version"
     UPDATE_DATE = "update_date"
 
+
 class StorageKeysEnum(Enum):
     """ StorageKeysEnum """
     CONSERVATIVE_STOP = "conservative_stop"
@@ -85,4 +86,3 @@ class Storage:
     def get_stored_data_by_ticker(self, ticker: str) -> Union[dict, None]:
         """ get the stored data """
         return self.stored_data[StorageKeysTopEnum.TICKERS.value].get(ticker)
-        

@@ -11,6 +11,7 @@ from .libs import (
     StorageKeysEnum
 )
 
+
 class IntelliStop:
     """ Intellistop class and functioning object """
     config: ConfigProperties = {}
@@ -32,7 +33,6 @@ class IntelliStop:
             config = {}
         self.config = ConfigProperties(config)
 
-
     def update_config(self, config: Union[dict, None] = None):
         """update_config
 
@@ -44,63 +44,6 @@ class IntelliStop:
         if not config:
             config = {}
         self.config = ConfigProperties(config)
-
-
-    def get_correct_pricing_key(self, data_set: dict) -> str:
-        """get_correct_pricing_key
-
-        Automatically determine if price key is 'Close' (most of them) or 'Adj Close' (for mutual
-        funds, specifically)
-
-        Args:
-            data_set (dict): [modified] yfinance dictionary of stock data, with typical 'OCHLVD'
-                            keys, where 'D' is date
-
-        Returns:
-            str: key that matches the type of fund
-        """
-        if self.has_errors:
-            return 'Close'
-        test_set = {
-            data_set['Close'][3],
-            data_set['Open'][3],
-            data_set['High'][3],
-            data_set['Low'][3]
-        }
-        if len(test_set) == 1:
-            return 'Adj Close'
-        return 'Close'
-
-
-    def fetch_extended_time_series(self, fund: str) -> dict:
-        """fetch_extended_time_series
-
-        Pull data using yf api. For now, we'll default to a period of '5y' for analysis
-
-        Args:
-            fund (str): ticker symbol of the trade
-
-        Returns:
-            dict: data dict of 'OCHLVD' data, where 'D' is date. Format is nested:
-                {
-                    'SPY': {
-                        'Open': [],
-                        ...
-                    }
-                }
-        """
-        self.fund_name = fund
-        self.config.yf_properties.period = '5y'
-        self.config.yf_properties.start_date = None
-        self.config.yf_properties.end_date = None
-        self.data = download_data(fund, self.config)
-
-        if len(self.data[self.fund_name]['Close']) == 0:
-            self.has_errors = True
-
-        self.config.vf_properties.pricing = self.get_correct_pricing_key(self.data[self.fund_name])
-        return self.data
-
 
     def return_data(self, fund="", key: Union[str, None] = None) -> Union[dict, list]:
         """return_data
@@ -130,8 +73,132 @@ class IntelliStop:
             return self.data[fund][key]
         return self.data
 
+    def run_analysis_for_ticker(self, fund: str) -> Tuple[VFStopsResultType, bool]:
+        """run_analysis_for_ticker
 
-    def calculate_vf_stops_data(self) -> VFStopsResultType:
+        High-level function that runs all Intellistop functionality, a single function to run
+
+        Args:
+            fund (str): ticker symbol (e.g. "SPY")
+
+        Returns:
+            VFStopsResultType: The full results of the function:
+
+                    derived: VFStopLossRawResultType
+                    alternate: VFStopLossRawResultType
+                    vf: VFStopLossResultType
+                    stop_loss: VFStopLossResultType
+                    current_max: float
+                    fund_name: str
+                    data_sets: List[VFTimeSeriesType]
+                    event_log: list
+
+            boolean: has_error (True if error in calculation)
+        """
+        # We need to remember to reset on looping
+        self.has_errors = False
+        self.__fetch_extended_time_series(fund)
+        if self.has_errors:
+            return self.stops, True
+
+        self.__calculate_vf_stops_data()
+        self.__generate_intelligent_moving_average()
+        self.__analyze_data_set()
+
+        if self.use_memory:
+            data = NewTickerDataStorageType(
+                self.stops.vf.curated,
+                self.stops.stop_loss.curated,
+                self.stops.data_sets[-1].max_price)
+            self.storage_provider.update_ticker(self.stops.fund_name, data)
+            self.storage_provider.store()
+
+        return self.stops, False
+
+######################################################
+
+    def __analyze_data_set(self) -> List[VFTimeSeriesType]:
+        """analyze_data_set
+
+        Generate the actual analysis for the intellistop data set
+
+        Returns:
+            list: list of VFTimeSeriesType
+        """
+        if self.has_errors:
+            return []
+
+        # Because the market typically goes up over time, we'll assume we start each 5y series
+        # with an "uptrend" and therefore stop-loss mode
+        data = self.data[self.fund_name][self.config.vf_properties.pricing]
+        volatility_factor = self.stops.vf.curated
+
+        min_vf = volatility_factor
+        if self.use_memory:
+            historical_data = self.storage_provider.get_stored_data_by_ticker(self.fund_name)
+            if historical_data:
+                min_vf = min(volatility_factor, historical_data[StorageKeysEnum.MIN_VF.value])
+
+        self.stops.vf.historical_cons = min_vf
+
+        self.stops.data_sets, self.stops.event_log = generate_stop_loss_data_set(
+            data,
+            volatility_factor,
+            self.intelligent_moving_avg.data_set,
+            self.intelligent_moving_avg.short_slope,
+            self.intelligent_moving_avg.long_slope,
+            min_vf
+        )
+
+        self.stops.current_status.max_price = round(self.stops.data_sets[-1].max_price, 2)
+        self.stops.current_status.max_price_date = self.data[self.fund_name]['Date']\
+            [self.stops.data_sets[-1].max_price_index]
+
+        if self.stops.data_sets[-1].time_index_list[-1] != len(data) - 1:
+            self.stops.current_status.status = CurrentStatusType.STOPPED_OUT
+        else:
+            if data[-1] > self.stops.data_sets[-1].caution_line[-1]:
+                self.stops.current_status.status = CurrentStatusType.ACTIVE_ZONE
+            else:
+                self.stops.current_status.status = CurrentStatusType.CAUTION_ZONE
+
+        self.stops.stop_loss = get_current_stop_loss_values(
+            self.stops.vf,
+            self.stops.data_sets[-1].max_price
+        )
+
+        return self.stops.data_sets
+
+    def __fetch_extended_time_series(self, fund: str) -> dict:
+        """fetch_extended_time_series
+
+        Pull data using yf api. For now, we'll default to a period of '5y' for analysis
+
+        Args:
+            fund (str): ticker symbol of the trade
+
+        Returns:
+            dict: data dict of 'OCHLVD' data, where 'D' is date. Format is nested:
+                {
+                    'SPY': {
+                        'Open': [],
+                        ...
+                    }
+                }
+        """
+        self.fund_name = fund
+        self.config.yf_properties.period = '5y'
+        self.config.yf_properties.start_date = None
+        self.config.yf_properties.end_date = None
+        self.data = download_data(fund, self.config)
+
+        if len(self.data[self.fund_name]['Close']) == 0:
+            self.has_errors = True
+
+        self.config.vf_properties.pricing = 'Close'
+        return self.data
+
+    def __calculate_vf_stops_data(self) -> VFStopsResultType:
         """calculate_vf_stops_data
 
         Generate the stop loss / VF data
@@ -182,39 +249,38 @@ class IntelliStop:
                 * (1.0 - (root_sq_fraction / 100.0))
 
             if is_derived:
-                self.stops.derived.vf = root_sq_fraction
-                self.stops.derived.stop_loss = root_sq_sl
+                self.stops.derived.vf = float(root_sq_fraction)
+                self.stops.derived.stop_loss = float(root_sq_sl)
             else:
-                self.stops.alternate.vf = root_sq_fraction
-                self.stops.alternate.stop_loss = root_sq_sl
+                self.stops.alternate.vf = float(root_sq_fraction)
+                self.stops.alternate.stop_loss = float(root_sq_sl)
 
-        self.stops.stop_loss.aggressive = np.min(
+        self.stops.stop_loss.aggressive = float(min(
             [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
-        )
-        self.stops.stop_loss.average = np.average(
-            [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
-        )
-        self.stops.stop_loss.curated = self.stops.stop_loss.average
-        self.stops.stop_loss.conservative = np.max(
-            [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
-        )
+        ))
+        self.stops.stop_loss.average = \
+            float((self.stops.derived.stop_loss + self.stops.alternate.stop_loss) / 2.0)
 
-        self.stops.vf.conservative = np.min(
+        self.stops.stop_loss.curated = float(self.stops.stop_loss.average)
+        self.stops.stop_loss.conservative = float(max(
+            [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
+        ))
+
+        self.stops.vf.conservative = float(min(
             [self.stops.derived.vf, self.stops.alternate.vf]
-        )
-        self.stops.vf.average = np.average([self.stops.derived.vf, self.stops.alternate.vf])
+        ))
+        self.stops.vf.average = float((self.stops.derived.vf + self.stops.alternate.vf) / 2.0)
         self.stops.vf.curated = self.stops.vf.average
-        self.stops.vf.aggressive = np.max([self.stops.derived.vf, self.stops.alternate.vf])
+        self.stops.vf.aggressive = float(max([self.stops.derived.vf, self.stops.alternate.vf]))
 
         if self.stops.vf.average > 50.0:
             self.stops.vf.curated = 50.0
-            self.stops.stop_loss.curated = max(self.data[self.fund_name][data_key]) \
-                * (1.0 - (self.stops.vf.curated / 100.0))
+            self.stops.stop_loss.curated = float(max(self.data[self.fund_name][data_key]) \
+                * (1.0 - (self.stops.vf.curated / 100.0)))
 
         return self.stops
 
-
-    def generate_intelligent_moving_average(self) -> Tuple[list, list, list]:
+    def __generate_intelligent_moving_average(self) -> Tuple[list, list, list]:
         """generate_intelligent_moving_average
 
         Returns:
@@ -248,103 +314,3 @@ class IntelliStop:
             self.intelligent_moving_avg.short_slope,
             self.intelligent_moving_avg.long_slope
         )
-
-
-    def analyze_data_set(self) -> List[VFTimeSeriesType]:
-        """analyze_data_set
-
-        Generate the actual analysis for the intellistop data set
-
-        Returns:
-            list: list of VFTimeSeriesType
-        """
-        if self.has_errors:
-            return []
-
-        # Because the market typically goes up over time, we'll assume we start each 5y series
-        # with an "uptrend" and therefore stop-loss mode
-        data = self.data[self.fund_name][self.config.vf_properties.pricing]
-        volatility_factor = self.stops.vf.curated
-
-        min_vf = volatility_factor
-        if self.use_memory:
-            historical_data = self.storage_provider.get_stored_data_by_ticker(self.fund_name)
-            if historical_data:
-                min_vf = min(volatility_factor, historical_data[StorageKeysEnum.MIN_VF.value])
-
-        self.stops.vf.historical_cons = min_vf
-
-        self.stops.data_sets, self.stops.event_log = generate_stop_loss_data_set(
-            data,
-            volatility_factor,
-            self.intelligent_moving_avg.data_set,
-            self.intelligent_moving_avg.short_slope,
-            self.intelligent_moving_avg.long_slope,
-            min_vf
-        )
-
-        self.stops.current_status.max_price = np.round(self.stops.data_sets[-1].max_price, 2)
-        self.stops.current_status.max_price_date = self.data[self.fund_name]['Date']\
-            [self.stops.data_sets[-1].max_price_index]
-
-        if self.stops.data_sets[-1].time_index_list[-1] != len(data) - 1:
-            self.stops.current_status.status = CurrentStatusType.STOPPED_OUT
-        else:
-            if data[-1] > self.stops.data_sets[-1].caution_line[-1]:
-                self.stops.current_status.status = CurrentStatusType.ACTIVE_ZONE
-            else:
-                self.stops.current_status.status = CurrentStatusType.CAUTION_ZONE
-
-        self.stops.stop_loss = get_current_stop_loss_values(
-            self.stops.vf,
-            self.stops.data_sets[-1].max_price
-        )
-
-        return self.stops.data_sets
-
-
-    ##########################################################################################
-    # ACTUAL FUNCTION
-    ##########################################################################################
-
-    def run_analysis_for_ticker(self, fund: str) -> Tuple[VFStopsResultType, bool]:
-        """run_analysis_for_ticker
-
-        High-level function that runs all Intellistop functionality, a single function to run
-
-        Args:
-            fund (str): ticker symbol (e.g. "SPY")
-
-        Returns:
-            VFStopsResultType: The full results of the function:
-
-                    derived: VFStopLossRawResultType
-                    alternate: VFStopLossRawResultType
-                    vf: VFStopLossResultType
-                    stop_loss: VFStopLossResultType
-                    current_max: float
-                    fund_name: str
-                    data_sets: List[VFTimeSeriesType]
-                    event_log: list
-
-            boolean: has_error (True if error in calculation)
-        """
-        # We need to remember to reset on looping
-        self.has_errors = False
-        self.fetch_extended_time_series(fund)
-        if self.has_errors:
-            return self.stops, True
-
-        self.calculate_vf_stops_data()
-        self.generate_intelligent_moving_average()
-        self.analyze_data_set()
-
-        if self.use_memory:
-            data = NewTickerDataStorageType(
-                self.stops.vf.curated,
-                self.stops.stop_loss.curated,
-                self.stops.data_sets[-1].max_price)
-            self.storage_provider.update_ticker(self.stops.fund_name, data)
-            self.storage_provider.store()
-
-        return self.stops, False

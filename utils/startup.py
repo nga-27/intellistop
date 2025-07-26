@@ -5,6 +5,7 @@ Functions for app prints on running script
 from pathlib import Path
 import time
 from typing import Tuple
+from importlib.metadata import version
 
 
 MAIN = "\033[1;35m"
@@ -16,23 +17,9 @@ OUTLINE_COLOR = "\033[0;34m"
 AUTHOR_COLOR = "\033[0;35m"
 
 
-def pull_version_from_setup() -> str:
-    """pull_version_from_setup
-
-    Pull the VERSION value from the setup.py file
-
-    Returns:
-        str: version value
-    """
-    setup_path = Path("setup.py").resolve()
-    with open(setup_path, 'r', encoding='utf-8') as setup_file:
-        data = setup_file.readlines()
-    return data[24][11:16]
-
-
 def start_header() -> None:
     """ Primary User Input Controller """
-    version = pull_version_from_setup()
+    version_val = version('intellistop')
 
     print(" ")
     print(f"{OUTLINE_COLOR}----------------------------------")
@@ -40,7 +27,7 @@ def start_header() -> None:
     print("-                                -")
     print(f"-{AUTHOR_COLOR}            nga-27              {OUTLINE_COLOR}-")
     print("-                                -")
-    print(f"-{NORMAL}       version: {version}           {OUTLINE_COLOR}-")
+    print(f"-{NORMAL}       version: {version_val}           {OUTLINE_COLOR}-")
     print(f"----------------------------------{NORMAL}")
     print(" ")
 

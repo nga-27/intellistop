@@ -5,7 +5,6 @@ current max, it is considered to be in a major downward trend, and it should be 
 hits its re-entry signal.
 """
 from typing import Tuple, List
-import numpy as np
 
 from .lib_types import (
     StopLossEventLogType, StopLossEventType, VFTimeSeriesType, VFStopLossResultType
@@ -69,12 +68,13 @@ def get_current_stop_loss_values(current_vfs: VFStopLossResultType,
         VFStopLossResultType: aggressive, average, curated, conservative
     """
     current_sl = VFStopLossResultType()
-    current_sl.aggressive = get_stop_loss_from_value(current_max, current_vfs.aggressive)
-    current_sl.average = get_stop_loss_from_value(current_max, current_vfs.average)
-    current_sl.curated = get_stop_loss_from_value(current_max, min(current_vfs.curated, 50.0))
-    current_sl.conservative = get_stop_loss_from_value(current_max, current_vfs.conservative)
+    current_sl.aggressive = get_stop_loss_from_value(current_max, float(current_vfs.aggressive))
+    current_sl.average = get_stop_loss_from_value(current_max, float(current_vfs.average))
+    current_sl.curated = get_stop_loss_from_value(
+        current_max, float(min(current_vfs.curated, 50.0)))
+    current_sl.conservative = get_stop_loss_from_value(current_max, float(current_vfs.conservative))
     current_sl.historical_cons = get_stop_loss_from_value(
-        current_max, min(current_vfs.historical_cons, 50.0))
+        current_max, float(min(current_vfs.historical_cons, 50.0)))
 
     return current_sl
 
@@ -103,10 +103,11 @@ def generate_stop_loss_data_set(data: list,
     Returns:
         Tuple[ List[VFTimeSeriesType], List[StopLossEventLogType]]
     """
-    # pylint: disable=too-many-branches,too-many-statements
+    # pylint: disable=too-many-branches,too-many-statements,too-many-locals
     stop_loss_objects = []
     stop_loss_logs = []
 
+    data = [float(item) for item in data]
     current_max = [0, data[0]]
     current_min = [0, 100.0 * data[0]]
     mode = 'active'
@@ -161,7 +162,7 @@ def generate_stop_loss_data_set(data: list,
                 current_max[1] = 0.0
                 log = StopLossEventLogType()
                 log.index = i
-                log.price = np.round(data[i], 2)
+                log.price = round(data[i], 2)
                 stop_loss_logs.append(log)
                 stop_loss_objects.append(sl_data)
 
@@ -172,7 +173,7 @@ def generate_stop_loss_data_set(data: list,
                 current_min[0] = i
                 log = StopLossEventLogType()
                 log.index = i
-                log.price = np.round(data[i], 2)
+                log.price = round(data[i], 2)
                 log.event = StopLossEventType.MINIMUM
                 stop_loss_logs.append(log)
 
@@ -221,7 +222,7 @@ def generate_stop_loss_data_set(data: list,
 
                 log = StopLossEventLogType()
                 log.index = i
-                log.price = np.round(data[i], 2)
+                log.price = round(data[i], 2)
                 log.event = StopLossEventType.ACTIVATE
                 stop_loss_logs.append(log)
 

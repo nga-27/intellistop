@@ -37,9 +37,11 @@ def download_data(fund: str, config: ConfigProperties) -> dict:
             group_by='ticker'
         )
     elif start_date:
-        data = yf.download(tickers=fund, start=start_date, interval=interval, group_by='ticker')
+        data = yf.download(
+            tickers=fund, start=start_date, interval=interval, group_by='ticker', auto_adjust=True)
     else:
-        data = yf.download(tickers=fund, period=period, interval=interval, group_by='ticker')
+        data = yf.download(
+            tickers=fund, period=period, interval=interval, group_by='ticker', auto_adjust=True)
 
     formatted_data = format_data(data, fund)
     return formatted_data
