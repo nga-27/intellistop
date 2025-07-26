@@ -1,0 +1,19 @@
+name: On-Push
+
+on: [push]
+
+jobs:
+    call_pylint:
+        uses: ./.github/workflows/pylint.yml
+        with:
+            target_branch: ${{ github.ref_name }}
+        secrets: inherit
+
+    echo_test:
+        needs: call_pylint
+        if: ${{ needs.call_pylint.outputs.build_status == 'success'}}
+        runs-on: ubuntu-latest
+        steps:
+            - name: echoooo
+              run: |
+                echo "Whoooo success!"
