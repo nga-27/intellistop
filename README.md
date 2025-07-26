@@ -6,7 +6,7 @@ Library tool to determine a smart stop-loss for technical analysis of funds. Thi
 
 <img alt="mrna-stop-loss" src="static/mrna_stop_loss.png" width=600/>
 
-<img alt="vgt-stop-loss" src="static/vgt_20230719.png" width=600>
+<img alt="vgt-stop-loss" src="static/vgt_stop_loss.png" width=600>
 
 ---
 
