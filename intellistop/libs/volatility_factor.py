@@ -103,7 +103,7 @@ def generate_stop_loss_data_set(data: list,
     Returns:
         Tuple[ List[VFTimeSeriesType], List[StopLossEventLogType]]
     """
-    # pylint: disable=too-many-branches,too-many-statements
+    # pylint: disable=too-many-branches,too-many-statements,too-many-locals
     stop_loss_objects = []
     stop_loss_logs = []
 

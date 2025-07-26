@@ -379,12 +379,11 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
         )
 
     ax_handle.set_title(plot_config.title)
-
+    props = {"boxstyle": 'round', "facecolor": 'white', "alpha": 0.25}
     if len(text_str) > 0 and len(str_color) > 0:
         new_start = minimum - (y_range * 0.2)
         new_end = minimum + (y_range * 1.02)
         ax_handle.set_ylim(new_start, new_end)
-        props = dict(boxstyle='round', facecolor='white', alpha=0.25)
         ax_handle.text(
             0.02,
             0.02,
@@ -395,7 +394,6 @@ def app_plot(prices: list, dates: list, stop_loss_objects: List[VFTimeSeriesType
         )
 
     if len(plot_config.vf_sl_box_str) > 0:
-        props = dict(boxstyle='round', facecolor='white', alpha=0.25)
         ax_handle.text(
             0.01,
             1.02,
