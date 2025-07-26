@@ -11,6 +11,7 @@ from .libs import (
     StorageKeysEnum
 )
 
+
 class IntelliStop:
     """ Intellistop class and functioning object """
     config: ConfigProperties = {}
@@ -32,7 +33,6 @@ class IntelliStop:
             config = {}
         self.config = ConfigProperties(config)
 
-
     def update_config(self, config: Union[dict, None] = None):
         """update_config
 
@@ -44,33 +44,6 @@ class IntelliStop:
         if not config:
             config = {}
         self.config = ConfigProperties(config)
-
-
-    def get_correct_pricing_key(self, data_set: dict) -> str:
-        """get_correct_pricing_key
-
-        Automatically determine if price key is 'Close' (most of them) or 'Adj Close' (for mutual
-        funds, specifically)
-
-        Args:
-            data_set (dict): [modified] yfinance dictionary of stock data, with typical 'OCHLVD'
-                            keys, where 'D' is date
-
-        Returns:
-            str: key that matches the type of fund
-        """
-        if self.has_errors:
-            return 'Close'
-        test_set = {
-            data_set['Close'][3],
-            data_set['Open'][3],
-            data_set['High'][3],
-            data_set['Low'][3]
-        }
-        if len(test_set) == 1:
-            return 'Adj Close'
-        return 'Close'
-
 
     def fetch_extended_time_series(self, fund: str) -> dict:
         """fetch_extended_time_series
@@ -98,9 +71,8 @@ class IntelliStop:
         if len(self.data[self.fund_name]['Close']) == 0:
             self.has_errors = True
 
-        self.config.vf_properties.pricing = self.get_correct_pricing_key(self.data[self.fund_name])
+        self.config.vf_properties.pricing = 'Close'
         return self.data
-
 
     def return_data(self, fund="", key: Union[str, None] = None) -> Union[dict, list]:
         """return_data
@@ -129,7 +101,6 @@ class IntelliStop:
         if len(fund) > 0:
             return self.data[fund][key]
         return self.data
-
 
     def calculate_vf_stops_data(self) -> VFStopsResultType:
         """calculate_vf_stops_data
@@ -213,7 +184,6 @@ class IntelliStop:
 
         return self.stops
 
-
     def generate_intelligent_moving_average(self) -> Tuple[list, list, list]:
         """generate_intelligent_moving_average
 
@@ -248,7 +218,6 @@ class IntelliStop:
             self.intelligent_moving_avg.short_slope,
             self.intelligent_moving_avg.long_slope
         )
-
 
     def analyze_data_set(self) -> List[VFTimeSeriesType]:
         """analyze_data_set
@@ -301,7 +270,6 @@ class IntelliStop:
         )
 
         return self.stops.data_sets
-
 
     ##########################################################################################
     # ACTUAL FUNCTION
