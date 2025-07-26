@@ -73,7 +73,7 @@ Note: as of `1.1.0`, `has_error` has been added as a tuple output of the main fu
 You may also use the following subfunctions for your benefit as well:
 
 ```python
-from intellistop import Intellistop
+from intellistop import IntelliStop
 
 stops = IntelliStop()
 vf_data, has_error = stops.run_analysis_for_ticker(ticker_str)

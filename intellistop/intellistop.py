@@ -153,34 +153,34 @@ class IntelliStop:
                 * (1.0 - (root_sq_fraction / 100.0))
 
             if is_derived:
-                self.stops.derived.vf = root_sq_fraction
-                self.stops.derived.stop_loss = root_sq_sl
+                self.stops.derived.vf = float(root_sq_fraction)
+                self.stops.derived.stop_loss = float(root_sq_sl)
             else:
-                self.stops.alternate.vf = root_sq_fraction
-                self.stops.alternate.stop_loss = root_sq_sl
+                self.stops.alternate.vf = float(root_sq_fraction)
+                self.stops.alternate.stop_loss = float(root_sq_sl)
 
-        self.stops.stop_loss.aggressive = np.min(
+        self.stops.stop_loss.aggressive = float(min(
             [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
-        )
-        self.stops.stop_loss.average = np.average(
+        ))
+        self.stops.stop_loss.average = \
+            float((self.stops.derived.stop_loss + self.stops.alternate.stop_loss) / 2.0)
+        
+        self.stops.stop_loss.curated = float(self.stops.stop_loss.average)
+        self.stops.stop_loss.conservative = float(max(
             [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
-        )
-        self.stops.stop_loss.curated = self.stops.stop_loss.average
-        self.stops.stop_loss.conservative = np.max(
-            [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
-        )
+        ))
 
-        self.stops.vf.conservative = np.min(
+        self.stops.vf.conservative = float(min(
             [self.stops.derived.vf, self.stops.alternate.vf]
-        )
-        self.stops.vf.average = np.average([self.stops.derived.vf, self.stops.alternate.vf])
+        ))
+        self.stops.vf.average = float((self.stops.derived.vf + self.stops.alternate.vf) / 2.0)
         self.stops.vf.curated = self.stops.vf.average
-        self.stops.vf.aggressive = np.max([self.stops.derived.vf, self.stops.alternate.vf])
+        self.stops.vf.aggressive = float(max([self.stops.derived.vf, self.stops.alternate.vf]))
 
         if self.stops.vf.average > 50.0:
             self.stops.vf.curated = 50.0
-            self.stops.stop_loss.curated = max(self.data[self.fund_name][data_key]) \
-                * (1.0 - (self.stops.vf.curated / 100.0))
+            self.stops.stop_loss.curated = float(max(self.data[self.fund_name][data_key]) \
+                * (1.0 - (self.stops.vf.curated / 100.0)))
 
         return self.stops
 
@@ -252,7 +252,7 @@ class IntelliStop:
             min_vf
         )
 
-        self.stops.current_status.max_price = np.round(self.stops.data_sets[-1].max_price, 2)
+        self.stops.current_status.max_price = round(self.stops.data_sets[-1].max_price, 2)
         self.stops.current_status.max_price_date = self.data[self.fund_name]['Date']\
             [self.stops.data_sets[-1].max_price_index]
 

@@ -1,4 +1,4 @@
-name: Pylint
+name: Test
 
 on:
     workflow_call:
@@ -7,11 +7,11 @@ on:
                 required: true
                 type: string
         outputs:
-            build_status:
-                value: ${{ jobs.build.outputs.status }}
+            test_status:
+                value: ${{ jobs.test.outputs.status }}
 
 jobs:
-    build:
+    test:
         runs-on: ubuntu-latest
         strategy:
             matrix:
@@ -29,15 +29,11 @@ jobs:
             - name: Install dependencies
               run: |
                 python -m pip install --upgrade pip
-                pip install .[dev,app]
+                pip install .[app]
             
-            - name: pylint
+            - name: run-test
               run: |
-                pylint $(git ls-files '*.py')
-                pylint $(git ls-files 'intellistop/*.py')
-                pylint $(git ls-files 'intellistop/libs/*.py')
-                pylint $(git ls-files 'utils/*.py')
-                pylint $(git ls-files 'plot/*.py')
+                python test.py
 
             - name: set-output
               id: status_value
