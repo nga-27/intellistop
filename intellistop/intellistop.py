@@ -164,7 +164,7 @@ class IntelliStop:
         ))
         self.stops.stop_loss.average = \
             float((self.stops.derived.stop_loss + self.stops.alternate.stop_loss) / 2.0)
-        
+
         self.stops.stop_loss.curated = float(self.stops.stop_loss.average)
         self.stops.stop_loss.conservative = float(max(
             [self.stops.derived.stop_loss, self.stops.alternate.stop_loss]
