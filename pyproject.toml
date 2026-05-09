@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "intellistop"
-version = "2.0.0"
+version = "2.1.0"
 description = 'Library to determine a intelligent stop-loss for technical analysis of funds.'
 authors = [
     {name = "Nick Amell", email = "namell91@gmail.com"}
