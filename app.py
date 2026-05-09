@@ -11,7 +11,7 @@ def run_app():
     Primary application function that runs the standalone process
     """
     # pylint: disable=too-many-locals
-    fund_list, fund_raw, has_error, should_plot = startup.handle_startup()
+    fund_list, _, has_error, should_plot = startup.handle_startup()
     if has_error:
         return
 

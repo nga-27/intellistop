@@ -82,13 +82,13 @@ def handle_commands(command: str) -> Tuple[bool, List[str], bool]:
         print("--STORE: Store the entered tickers for future use")
         print("--USE_STORE: Use the stored tickers from the last run\r\n")
         return True, tickers_to_use, should_store_data, should_plot
-    elif cmd == "NO_PLOT":
+    if cmd == "NO_PLOT":
         should_plot = False
         return is_valid_command, tickers_to_use, should_store_data, should_plot
-    elif cmd == "STORE":
+    if cmd == "STORE":
         should_store_data = True
         return is_valid_command, tickers_to_use, should_store_data, should_plot
-    elif cmd == "USE_STORE":
+    if cmd == "USE_STORE":
         if Path(STORAGE_PATH).exists():
             with open(STORAGE_PATH, 'r', encoding='utf-8') as store_file:
                 stored_data = json.load(store_file)
@@ -96,10 +96,9 @@ def handle_commands(command: str) -> Tuple[bool, List[str], bool]:
         else:
             print(f"No storage file found at '{STORAGE_PATH}'.")
         return is_valid_command, tickers_to_use, should_store_data, should_plot
-    else:
-        print(f"ERROR: Unrecognized command '{cmd}' in input. Exiting...")
-        is_valid_command = False
-        return is_valid_command, tickers_to_use, should_store_data, should_plot
+    print(f"ERROR: Unrecognized command '{cmd}' in input. Exiting...")
+    is_valid_command = False
+    return is_valid_command, tickers_to_use, should_store_data, should_plot
 
 
 def save_to_store(ticker_list: List[str]) -> None:
