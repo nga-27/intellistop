@@ -11,15 +11,15 @@ def run_app():
     Primary application function that runs the standalone process
     """
     # pylint: disable=too-many-locals
-    fund_list, fund_raw, has_error = startup.handle_startup()
+    fund_list, _, has_error, should_plot = startup.handle_startup()
     if has_error:
         return
 
     # Can either pass nothing or pass True/False to use_memory for more conservative stops
     stops = IntelliStop(use_memory=True)
 
-    print(f"Starting 'Intellistop' with fund ticker(s): '{fund_raw}'...")
-
+    printable = ", ".join(fund_list)
+    print(f"Starting 'Intellistop' with fund ticker(s): '{printable}'...")
     for fund in fund_list:
         vf_data, has_error = stops.run_analysis_for_ticker(fund)
         if has_error:
@@ -44,26 +44,27 @@ def run_app():
         )
         range_value = max(close) - min_value
 
-        plot_config = plot.set_plot_config(
-            f"{fund}_stop_losses.png",
-            f"{fund} - Stop Loss Analysis",
-            vf_stop_loss_text=shown_stop_loss,
-            view=True
-        )
-        plot.app_plot(
-            close,
-            dates,
-            vf_data.data_sets,
-            green_zones,
-            red_zones,
-            yellow_zones,
-            range_value,
-            min_value,
-            config=plot_config,
-            text_str=status_string,
-            str_color=status_color,
-            orange_zone_x_values=orange_zones
-        )
+        if should_plot:
+            plot_config = plot.set_plot_config(
+                f"{fund}_stop_losses.png",
+                f"{fund} - Stop Loss Analysis",
+                vf_stop_loss_text=shown_stop_loss,
+                view=True
+            )
+            plot.app_plot(
+                close,
+                dates,
+                vf_data.data_sets,
+                green_zones,
+                red_zones,
+                yellow_zones,
+                range_value,
+                min_value,
+                config=plot_config,
+                text_str=status_string,
+                str_color=status_color,
+                orange_zone_x_values=orange_zones
+            )
 
 
 if __name__ == "__main__":
