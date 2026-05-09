@@ -21,7 +21,7 @@ jobs:
         needs: 
             - call_test
             - call_pylint
-        if: ${{ needs.call_pylint.outputs.build_status == 'success'}} && ${{ needs.call_test.outputs.test_status == 'success'}}
+        if: ${{ needs.call_pylint.outputs.build_status == 'success' && needs.call_test.outputs.test_status == 'success' }}
         runs-on: ubuntu-latest
         steps:
             - name: echoooo
